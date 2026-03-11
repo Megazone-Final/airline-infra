@@ -10,7 +10,7 @@ resource "aws_s3_bucket" "test" {
 }
 
 resource "random_id" "suffix" {
-  byte_length = 4
+  byte_length = 5
 }
 
 output "test_bucket_name" {
