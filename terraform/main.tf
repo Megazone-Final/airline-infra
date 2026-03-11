@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "s3-an2-airline-tfstate"
+    bucket  = "s3-an2-airline-infra"
     key     = "test/terraform.tfstate"
     region  = "ap-northeast-2"
     encrypt = true
