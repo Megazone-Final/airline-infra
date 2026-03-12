@@ -1,0 +1,13 @@
+# Terraform generated files
+.terraform/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+
+# Terraform local override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

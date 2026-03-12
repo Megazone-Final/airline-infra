@@ -1,21 +1,21 @@
-terraform {
-  required_version = ">= 1.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-
-  backend "s3" {
-    bucket  = "s3-an2-airline-infra"
-    key     = "test/terraform.tfstate"
-    region  = "ap-northeast-2"
-    encrypt = true
+locals {
+  common_tags = {
+    Project     = var.project
+    Environment = var.environment
+    ManagedBy   = "terraform"
   }
 }
 
-provider "aws" {
-  region = "ap-northeast-2"
+module "vpc" {
+  source = "./modules/vpc"
+
+  region_code                  = var.region_code
+  project_name                 = var.project
+  cidr_block                   = var.vpc_cidr
+  azs                          = var.azs
+  subnet_cidrs                 = var.subnet_cidrs
+  pod_secondary_cidr           = var.pod_secondary_cidr
+  pod_subnet_cidrs             = var.pod_subnet_cidrs
+  alb_cluster_name             = var.alb_cluster_name
+  tags                         = merge(local.common_tags, var.tags)
 }
