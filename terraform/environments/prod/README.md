@@ -16,3 +16,5 @@ Recommended ownership:
 Optional ECR, EKS, and frontend hosting examples are kept as documentation only in `terraform.tfvars.example`.
 
 Do not create parallel `dev` or `stage` stacks unless the project budget and operational model actually require them.
+
+hi
