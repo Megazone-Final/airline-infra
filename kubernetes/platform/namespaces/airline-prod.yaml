@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airline-prod
+  labels:
+    app.kubernetes.io/part-of: airline
+    environment: prod

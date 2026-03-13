@@ -1,0 +1,22 @@
+# Enable only the components you are ready to manage with Terraform.
+
+enable_vpc              = true
+enable_ecr              = false
+enable_eks              = false
+enable_frontend_hosting = false
+
+# Keep NAT off until private workloads require outbound internet access.
+create_nat_gateway = false
+
+# Suggested backend repositories used by the backend CI workflows.
+ecr_repository_names = [
+  "airline-backend/auth",
+  "airline-backend/flights",
+  "airline-backend/payments",
+]
+
+# When you are ready to move the frontend hosting into Terraform, enable it and
+# optionally set a fixed bucket name and custom domain certificate.
+# frontend_bucket_name         = "your-existing-frontend-bucket"
+# frontend_aliases             = ["airline.example.com"]
+# frontend_acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
