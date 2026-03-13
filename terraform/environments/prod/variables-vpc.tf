@@ -1,7 +1,7 @@
-variable "aws_region" {
-  description = "AWS region for the VPC."
+variable "project_name" {
+  description = "Project name used for resource naming."
   type        = string
-  default     = "ap-northeast-2"
+  default     = "airline"
 }
 
 variable "region_code" {
@@ -10,26 +10,26 @@ variable "region_code" {
   default     = "an2"
 }
 
-variable "project" {
-  description = "Project name used in resource tags."
-  type        = string
-  default     = "airline"
-}
-
 variable "environment" {
-  description = "Environment name used in resource tags."
+  description = "Logical environment name."
   type        = string
   default     = "prod"
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC."
+variable "tags" {
+  description = "Additional tags applied to supported resources."
+  type        = map(string)
+  default     = {}
+}
+
+variable "cidr_block" {
+  description = "CIDR block for the shared VPC."
   type        = string
   default     = "10.0.0.0/24"
 }
 
 variable "azs" {
-  description = "Availability zones used for the VPC subnets."
+  description = "Availability zones keyed by short suffix."
   type        = map(string)
   default = {
     "2a" = "ap-northeast-2a"
@@ -38,7 +38,7 @@ variable "azs" {
 }
 
 variable "subnet_cidrs" {
-  description = "Primary VPC subnet CIDRs."
+  description = "Primary VPC subnet CIDRs keyed by subnet role and AZ."
   type = object({
     edge_public_2a  = string
     edge_public_2c  = string
@@ -64,7 +64,7 @@ variable "pod_secondary_cidr" {
 }
 
 variable "pod_subnet_cidrs" {
-  description = "Pod subnet CIDRs from the secondary VPC CIDR."
+  description = "Pod subnet CIDRs carved from the secondary VPC CIDR."
   type = object({
     pod_private_2a = string
     pod_private_2c = string
@@ -73,16 +73,4 @@ variable "pod_subnet_cidrs" {
     pod_private_2a = "100.64.0.0/24"
     pod_private_2c = "100.64.1.0/24"
   }
-}
-
-variable "alb_cluster_name" {
-  description = "EKS cluster name used for optional AWS Load Balancer Controller subnet discovery tag."
-  type        = string
-  default     = ""
-}
-
-variable "tags" {
-  description = "Additional tags applied to the VPC."
-  type        = map(string)
-  default     = {}
 }

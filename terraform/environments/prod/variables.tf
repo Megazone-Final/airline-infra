@@ -1,213 +1,82 @@
-variable "project_name" {
-  description = "Project name used for resource naming."
-  type        = string
-  default     = "airline"
-}
+# Disabled reference file.
+# Active VPC variable file: variables-vpc.tf
 
-variable "environment" {
-  description = "Logical environment name."
-  type        = string
-  default     = "prod"
-}
+# This file is kept only so you can compare the old generic naming
+# (`variables.tf`) with the new VPC-specific layout.
 
-variable "tags" {
-  description = "Additional tags applied to supported resources."
-  type        = map(string)
-  default     = {}
-}
+# variable "project_name" {
+#   description = "Project name used for resource naming."
+#   type        = string
+#   default     = "airline"
+# }
 
-variable "enable_vpc" {
-  description = "When true, create the shared VPC."
-  type        = bool
-  default     = false
-}
+# variable "region_code" {
+#   description = "Short region code used in the resource naming convention."
+#   type        = string
+#   default     = "an2"
+# }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the shared VPC."
-  type        = string
-  default     = "10.20.0.0/16"
-}
+# variable "environment" {
+#   description = "Logical environment name."
+#   type        = string
+#   default     = "prod"
+# }
 
-variable "availability_zones" {
-  description = "Availability zones used by the shared VPC."
-  type        = list(string)
-  default     = ["ap-northeast-2a", "ap-northeast-2c"]
-}
+# variable "tags" {
+#   description = "Additional tags applied to supported resources."
+#   type        = map(string)
+#   default     = {}
+# }
 
-variable "public_subnet_cidrs" {
-  description = "Public subnet CIDR blocks, one per availability zone."
-  type        = list(string)
-  default     = ["10.20.1.0/24", "10.20.2.0/24"]
-}
+# variable "cidr_block" {
+#   description = "CIDR block for the shared VPC."
+#   type        = string
+#   default     = "10.0.0.0/24"
+# }
 
-variable "private_subnet_cidrs" {
-  description = "Private subnet CIDR blocks, one per availability zone."
-  type        = list(string)
-  default     = ["10.20.11.0/24", "10.20.12.0/24"]
-}
+# variable "azs" {
+#   description = "Availability zones keyed by short suffix."
+#   type        = map(string)
+#   default = {
+#     "2a" = "ap-northeast-2a"
+#     "2c" = "ap-northeast-2c"
+#   }
+# }
 
-variable "create_nat_gateway" {
-  description = "Create a single NAT gateway for private subnet egress."
-  type        = bool
-  default     = false
-}
+# variable "subnet_cidrs" {
+#   description = "Primary VPC subnet CIDRs keyed by subnet role and AZ."
+#   type = object({
+#     edge_public_2a  = string
+#     edge_public_2c  = string
+#     node_private_2a = string
+#     node_private_2c = string
+#     db_private_2a   = string
+#     db_private_2c   = string
+#   })
+#   default = {
+#     edge_public_2a  = "10.0.0.0/27"
+#     edge_public_2c  = "10.0.0.32/27"
+#     node_private_2a = "10.0.0.64/26"
+#     node_private_2c = "10.0.0.128/26"
+#     db_private_2a   = "10.0.0.192/28"
+#     db_private_2c   = "10.0.0.208/28"
+#   }
+# }
 
-variable "enable_ecr" {
-  description = "When true, create ECR repositories for backend services."
-  type        = bool
-  default     = false
-}
+# variable "pod_secondary_cidr" {
+#   description = "Secondary CIDR block associated with the VPC for pod networking."
+#   type        = string
+#   default     = "100.64.0.0/23"
+# }
 
-variable "ecr_repository_names" {
-  description = "Names of ECR repositories to create."
-  type        = list(string)
-  default = [
-    "airline-backend/auth",
-    "airline-backend/flights",
-    "airline-backend/payments",
-  ]
-}
-
-variable "ecr_image_tag_mutability" {
-  description = "ECR image tag mutability mode."
-  type        = string
-  default     = "MUTABLE"
-}
-
-variable "ecr_scan_on_push" {
-  description = "Enable image scanning on push for ECR repositories."
-  type        = bool
-  default     = true
-}
-
-variable "ecr_keep_last_images" {
-  description = "Number of tagged images to retain in each ECR repository."
-  type        = number
-  default     = 20
-}
-
-variable "enable_eks" {
-  description = "When true, create the shared EKS cluster and node group."
-  type        = bool
-  default     = false
-}
-
-variable "eks_cluster_version" {
-  description = "Kubernetes version for the EKS cluster."
-  type        = string
-  default     = "1.30"
-}
-
-variable "eks_service_ipv4_cidr" {
-  description = "Service CIDR for the EKS cluster."
-  type        = string
-  default     = "172.20.0.0/16"
-}
-
-variable "eks_endpoint_public_access" {
-  description = "Expose the EKS API endpoint publicly."
-  type        = bool
-  default     = true
-}
-
-variable "eks_endpoint_private_access" {
-  description = "Expose the EKS API endpoint privately inside the VPC."
-  type        = bool
-  default     = true
-}
-
-variable "eks_endpoint_public_access_cidrs" {
-  description = "Allowed CIDRs for public access to the EKS API endpoint."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
-variable "eks_cluster_log_types" {
-  description = "Enabled EKS control plane log types."
-  type        = list(string)
-  default     = ["api", "audit", "authenticator"]
-}
-
-variable "eks_log_retention_in_days" {
-  description = "Retention days for EKS control plane logs."
-  type        = number
-  default     = 7
-}
-
-variable "eks_node_group_name" {
-  description = "Name of the managed node group."
-  type        = string
-  default     = "default"
-}
-
-variable "eks_node_instance_types" {
-  description = "Instance types for the managed node group."
-  type        = list(string)
-  default     = ["t3.medium"]
-}
-
-variable "eks_node_capacity_type" {
-  description = "Capacity type for the managed node group."
-  type        = string
-  default     = "ON_DEMAND"
-}
-
-variable "eks_node_disk_size" {
-  description = "Disk size in GiB for managed node group instances."
-  type        = number
-  default     = 20
-}
-
-variable "eks_node_desired_size" {
-  description = "Desired node count."
-  type        = number
-  default     = 1
-}
-
-variable "eks_node_min_size" {
-  description = "Minimum node count."
-  type        = number
-  default     = 1
-}
-
-variable "eks_node_max_size" {
-  description = "Maximum node count."
-  type        = number
-  default     = 2
-}
-
-variable "enable_frontend_hosting" {
-  description = "When true, create the frontend static hosting stack."
-  type        = bool
-  default     = false
-}
-
-variable "frontend_bucket_name" {
-  description = "Optional explicit S3 bucket name for frontend assets."
-  type        = string
-  default     = ""
-}
-
-variable "frontend_aliases" {
-  description = "Optional CloudFront aliases. Requires an ACM certificate in us-east-1."
-  type        = list(string)
-  default     = []
-}
-
-variable "frontend_acm_certificate_arn" {
-  description = "Optional ACM certificate ARN for a custom frontend domain."
-  type        = string
-  default     = null
-}
-
-variable "frontend_price_class" {
-  description = "CloudFront price class for the frontend distribution."
-  type        = string
-  default     = "PriceClass_200"
-}
-
-variable "frontend_enable_spa_routing" {
-  description = "Map 403 and 404 errors to index.html for single-page app routing."
-  type        = bool
-  default     = true
-}
+# variable "pod_subnet_cidrs" {
+#   description = "Pod subnet CIDRs carved from the secondary VPC CIDR."
+#   type = object({
+#     pod_private_2a = string
+#     pod_private_2c = string
+#   })
+#   default = {
+#     pod_private_2a = "100.64.0.0/24"
+#     pod_private_2c = "100.64.1.0/24"
+#   }
+# }

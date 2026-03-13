@@ -15,9 +15,25 @@ resource "aws_route_table" "public" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
 
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.regional.id
+  }
+
   tags = merge(var.tags, {
     Name = local.names.rt_private
     Tier = "private"
+    Role = "node"
+  })
+}
+
+resource "aws_route_table" "db_private" {
+  vpc_id = aws_vpc.this.id
+
+  tags = merge(var.tags, {
+    Name = local.names.rt_db_private
+    Tier = "private"
+    Role = "db"
   })
 }
 
@@ -40,7 +56,9 @@ resource "aws_route_table_association" "primary" {
   for_each = local.primary_subnets
 
   subnet_id      = aws_subnet.primary[each.key].id
-  route_table_id = each.value.route_table == "public" ? aws_route_table.public.id : aws_route_table.private.id
+  route_table_id = each.value.route_table == "public" ? aws_route_table.public.id : (
+    each.value.route_table == "db_private" ? aws_route_table.db_private.id : aws_route_table.private.id
+  )
 }
 
 resource "aws_route_table_association" "pod" {

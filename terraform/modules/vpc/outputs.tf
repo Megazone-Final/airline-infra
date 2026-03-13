@@ -35,11 +35,35 @@ output "public_subnet_ids" {
   }
 }
 
+output "node_private_subnet_ids" {
+  description = "Node private subnet IDs."
+  value = {
+    for key in local.node_private_subnet_keys : key => aws_subnet.primary[key].id
+  }
+}
+
+output "db_private_subnet_ids" {
+  description = "Database private subnet IDs."
+  value = {
+    for key in local.db_private_subnet_keys : key => aws_subnet.primary[key].id
+  }
+}
+
+output "pod_private_subnet_ids" {
+  description = "Pod private subnet IDs."
+  value = {
+    for key in local.pod_subnet_keys : key => aws_subnet.pod[key].id
+  }
+}
+
 output "private_subnet_ids" {
   description = "Private subnet IDs."
   value = merge(
     {
-      for key in local.private_primary_subnet_keys : key => aws_subnet.primary[key].id
+      for key in local.node_private_subnet_keys : key => aws_subnet.primary[key].id
+    },
+    {
+      for key in local.db_private_subnet_keys : key => aws_subnet.primary[key].id
     },
     {
       for key in local.pod_subnet_keys : key => aws_subnet.pod[key].id
@@ -52,6 +76,7 @@ output "route_table_ids" {
   value = {
     public      = aws_route_table.public.id
     private     = aws_route_table.private.id
+    db_private  = aws_route_table.db_private.id
     pod_private = aws_route_table.pod_private.id
   }
 }

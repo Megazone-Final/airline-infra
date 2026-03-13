@@ -3,8 +3,10 @@ locals {
     vpc            = join("-", ["vpc", var.region_code, var.project_name, "network", "main"])
     igw            = join("-", ["igw", var.region_code, var.project_name, "network", "main"])
     nat            = join("-", ["nat", var.region_code, var.project_name, "network", "regional"])
+    nat_eip        = join("-", ["eip", var.region_code, var.project_name, "network", "nat"])
     rt_public      = join("-", ["rt", var.region_code, var.project_name, "edge", "pub"])
     rt_private     = join("-", ["rt", var.region_code, var.project_name, "shared", "pri"])
+    rt_db_private  = join("-", ["rt", var.region_code, var.project_name, "db", "pri"])
     rt_pod_private = join("-", ["rt", var.region_code, var.project_name, "pod", "pri"])
   }
 
@@ -71,7 +73,7 @@ locals {
       name                    = join("-", ["subnet", var.region_code, var.project_name, "db", "pri-2a"])
       tier                    = "private"
       role                    = "db"
-      route_table             = "private"
+      route_table             = "db_private"
       map_public_ip_on_launch = false
       requires_secondary_cidr = false
       additional_tags         = {}
@@ -82,7 +84,7 @@ locals {
       name                    = join("-", ["subnet", var.region_code, var.project_name, "db", "pri-2c"])
       tier                    = "private"
       role                    = "db"
-      route_table             = "private"
+      route_table             = "db_private"
       map_public_ip_on_launch = false
       requires_secondary_cidr = false
       additional_tags         = {}
@@ -126,9 +128,14 @@ locals {
     if subnet.route_table == "public"
   ])
 
-  private_primary_subnet_keys = sort([
+  node_private_subnet_keys = sort([
     for key, subnet in local.primary_subnets : key
     if subnet.route_table == "private"
+  ])
+
+  db_private_subnet_keys = sort([
+    for key, subnet in local.primary_subnets : key
+    if subnet.route_table == "db_private"
   ])
 
   pod_subnet_keys = sort(keys(local.pod_subnets))
