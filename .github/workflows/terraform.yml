@@ -1,4 +1,4 @@
-name: "Terraform"
+name: "Terraform (prod)"
 
 on:
   push:
@@ -6,9 +6,11 @@ on:
       - main
     paths:
       - "terraform/**"
+      - ".github/workflows/terraform.yml"
   pull_request:
     paths:
       - "terraform/**"
+      - ".github/workflows/terraform.yml"
 
 permissions:
   id-token: write
@@ -17,11 +19,8 @@ permissions:
 
 jobs:
   terraform:
-    name: "Terraform"
+    name: "Terraform (prod)"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,20 +37,20 @@ jobs:
 
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check -diff
+        run: terraform fmt -check -diff -recursive terraform
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform -chdir=terraform/environments/prod init
 
       - name: Terraform Validate
         id: validate
-        run: terraform validate -no-color
+        run: terraform -chdir=terraform/environments/prod validate -no-color
 
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform plan -no-color
+        run: terraform -chdir=terraform/environments/prod plan -no-color
         continue-on-error: true
 
       - name: Comment PR with Plan
@@ -88,4 +87,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve
+        run: terraform -chdir=terraform/environments/prod apply -auto-approve
