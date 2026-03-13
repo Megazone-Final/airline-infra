@@ -12,7 +12,7 @@ variable "repository_names" {
 variable "image_tag_mutability" {
   description = "ECR tag mutability mode."
   type        = string
-  default     = "MUTABLE"
+  default     = "IMMUTABLE"
 }
 
 variable "scan_on_push" {
