@@ -23,3 +23,13 @@ resouce "aws_s3_bucket_server_side_encryption_configuration" "airline_grafana_lo
         }
     }
 }
+
+resource "aws_s3_bucket_public_access_block" "airline_grafana_logs" {
+    bucket = aws_s3_bucket.airline_grafana_logs.id
+
+    block_public_acls = true
+    block_public_policy = true
+    ignore_public_acls = true
+    restrict_public_buckets = true
+}
+
