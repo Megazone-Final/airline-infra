@@ -1,0 +1,44 @@
+# 예시 파일입니다.
+# 확장자가 `.tf.example` 이므로 Terraform이 읽지 않습니다.
+#
+# 목적:
+# - CloudWatch Log Group 예시
+# - CloudWatch Alarm 예시
+#
+# 참고:
+# - 아래 Alarm 예시는 ALB 5XX 알람 기준입니다.
+# - SNS 알림 ARN 과 LoadBalancer dimension 값은 실제 값으로 교체해야 합니다.
+
+# resource "aws_cloudwatch_log_group" "app" {
+#   name              = "/aws/${var.project_name}/${var.environment}/app"
+#   retention_in_days = 30
+#
+#   tags = local.common_tags
+# }
+#
+# resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
+#   alarm_name          = "${local.name_prefix}-alb-5xx"
+#   alarm_description   = "ALB 대상 5XX 에러가 임계치를 넘으면 알림"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = 1
+#   metric_name         = "HTTPCode_Target_5XX_Count"
+#   namespace           = "AWS/ApplicationELB"
+#   period              = 300
+#   statistic           = "Sum"
+#   threshold           = 5
+#   treat_missing_data  = "notBreaching"
+#
+#   dimensions = {
+#     LoadBalancer = "app/replace-me/1234567890abcdef"
+#   }
+#
+#   alarm_actions = [
+#     "arn:aws:sns:ap-northeast-2:123456789012:replace-me"
+#   ]
+#
+#   ok_actions = [
+#     "arn:aws:sns:ap-northeast-2:123456789012:replace-me"
+#   ]
+#
+#   tags = local.common_tags
+# }

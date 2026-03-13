@@ -1,0 +1,73 @@
+# 예시 파일입니다.
+# 확장자가 `.tf.example` 이므로 Terraform이 읽지 않습니다.
+#
+# 목적:
+# - DB subnet group, DB security group, RDS instance 를 어떤 식으로 두는지 예시 제공
+#
+# 주의:
+# - 비밀번호는 코드에 직접 쓰지 말고 Secrets Manager 또는 민감 변수로 관리하는 편이 맞습니다.
+# - 운영에서는 deletion_protection, backup_retention_period, multi_az 기준을 별도로 검토해야 합니다.
+
+# locals {
+#   rds_subnet_ids = [
+#     for key in sort(keys(module.vpc.db_private_subnet_ids)) :
+#     module.vpc.db_private_subnet_ids[key]
+#   ]
+# }
+#
+# resource "aws_security_group" "rds" {
+#   name        = "${local.name_prefix}-rds-sg"
+#   description = "RDS 전용 보안 그룹"
+#   vpc_id      = module.vpc.id
+#
+#   ingress {
+#     description = "VPC 내부 PostgreSQL 접근"
+#     from_port   = 5432
+#     to_port     = 5432
+#     protocol    = "tcp"
+#     cidr_blocks = [var.cidr_block]
+#   }
+#
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#
+#   tags = merge(local.common_tags, {
+#     Name = "${local.name_prefix}-rds-sg"
+#   })
+# }
+#
+# resource "aws_db_subnet_group" "app" {
+#   name       = "${local.name_prefix}-db-subnet-group"
+#   subnet_ids = local.rds_subnet_ids
+#
+#   tags = merge(local.common_tags, {
+#     Name = "${local.name_prefix}-db-subnet-group"
+#   })
+# }
+#
+# resource "aws_db_instance" "app" {
+#   identifier             = "${local.name_prefix}-db"
+#   engine                 = "postgres"
+#   engine_version         = "16.3"
+#   instance_class         = "db.t4g.micro"
+#   allocated_storage      = 20
+#   storage_type           = "gp3"
+#   storage_encrypted      = true
+#   username               = "replace_me"
+#   password               = "replace_me"
+#   db_subnet_group_name   = aws_db_subnet_group.app.name
+#   vpc_security_group_ids = [aws_security_group.rds.id]
+#   publicly_accessible    = false
+#   skip_final_snapshot    = true
+#   deletion_protection    = true
+#   backup_retention_period = 7
+#   multi_az               = false
+#
+#   tags = merge(local.common_tags, {
+#     Name = "${local.name_prefix}-db"
+#   })
+# }

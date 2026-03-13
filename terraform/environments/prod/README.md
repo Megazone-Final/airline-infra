@@ -13,8 +13,15 @@ Recommended ownership:
 
 - shared networking needed by the project
 
-Optional ECR, EKS, and frontend hosting examples are kept as documentation only in `terraform.tfvars.example`.
-Disabled S3 examples live in `s3.tf.example`; use them as reference only.
+비활성 예시 파일은 `.tf.example` 확장자로 두었습니다.
+현재 참고용 예시는 아래 파일들입니다.
+- `s3.tf.example`
+- `eks.tf.example`
+- `iam.tf.example`
+- `cloudwatch.tf.example`
+- `rds.tf.example`
+- `security-group.tf.example`
+- `waf.tf.example`
 
 Do not create parallel `dev` or `stage` stacks unless the project budget and operational model actually require them.
 
