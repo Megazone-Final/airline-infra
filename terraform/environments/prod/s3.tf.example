@@ -1,0 +1,121 @@
+# Example only.
+# Terraform does not load this file because the extension is `.tf.example`.
+#
+# Important:
+# The current ../../modules/s3 module is not a generic S3 bucket module.
+# It creates a static hosting stack:
+# - S3 bucket
+# - versioning
+# - server-side encryption
+# - public access block
+# - CloudFront OAC
+# - CloudFront distribution
+# - bucket policy for CloudFront access
+#
+# Use ../../modules/s3 only when the bucket is meant to serve a frontend/static site.
+# Do not use it as-is for upload buckets, log buckets, backup buckets, or data buckets.
+# Those should be modeled separately with plain aws_s3_* resources or a dedicated module.
+
+# -----------------------------------------------------------------------------
+# Example 1: one static site bucket
+# -----------------------------------------------------------------------------
+#
+# module "frontend_main" {
+#   source = "../../modules/s3"
+#
+#   name                = "${var.project_name}-${var.environment}-main"
+#   bucket_name         = "airline-main-frontend"
+#   aliases             = ["airline.example.com"]
+#   acm_certificate_arn = var.main_frontend_certificate_arn
+#   price_class         = "PriceClass_200"
+#   enable_spa_routing  = true
+#   tags                = local.common_tags
+# }
+
+# -----------------------------------------------------------------------------
+# Example 2: multiple static site buckets with for_each
+# -----------------------------------------------------------------------------
+#
+# locals {
+#   frontend_sites = {
+#     main = {
+#       bucket_name         = "airline-main-frontend"
+#       aliases             = ["airline.example.com"]
+#       acm_certificate_arn = var.main_frontend_certificate_arn
+#       price_class         = "PriceClass_200"
+#       enable_spa_routing  = true
+#     }
+#     admin = {
+#       bucket_name         = "airline-admin-frontend"
+#       aliases             = ["admin.airline.example.com"]
+#       acm_certificate_arn = var.admin_frontend_certificate_arn
+#       price_class         = "PriceClass_200"
+#       enable_spa_routing  = true
+#     }
+#   }
+# }
+#
+# module "frontend_sites" {
+#   for_each = local.frontend_sites
+#   source   = "../../modules/s3"
+#
+#   name                = "${var.project_name}-${var.environment}-${each.key}"
+#   bucket_name         = each.value.bucket_name
+#   aliases             = each.value.aliases
+#   acm_certificate_arn = each.value.acm_certificate_arn
+#   price_class         = each.value.price_class
+#   enable_spa_routing  = each.value.enable_spa_routing
+#   tags                = local.common_tags
+# }
+
+# -----------------------------------------------------------------------------
+# Example 3: non-static buckets
+# -----------------------------------------------------------------------------
+#
+# If the bucket purpose is not "frontend static hosting", do not force-fit it
+# into ../../modules/s3. Create a separate file and model the bucket according
+# to its job.
+#
+# Suggested split by purpose:
+# - s3-uploads.tf   : application/user upload buckets
+# - s3-logs.tf      : ALB, CloudFront, or app log buckets
+# - s3-backups.tf   : backup/archive buckets
+# - s3-data.tf      : data exchange or internal storage buckets
+#
+# Minimal sketch for a non-static bucket:
+#
+# resource "aws_s3_bucket" "app_uploads" {
+#   bucket = "airline-app-uploads"
+#
+#   tags = merge(local.common_tags, {
+#     Name    = "airline-app-uploads"
+#     Purpose = "uploads"
+#   })
+# }
+#
+# resource "aws_s3_bucket_versioning" "app_uploads" {
+#   bucket = aws_s3_bucket.app_uploads.id
+#
+#   versioning_configuration {
+#     status = "Enabled"
+#   }
+# }
+#
+# resource "aws_s3_bucket_server_side_encryption_configuration" "app_uploads" {
+#   bucket = aws_s3_bucket.app_uploads.id
+#
+#   rule {
+#     apply_server_side_encryption_by_default {
+#       sse_algorithm = "AES256"
+#     }
+#   }
+# }
+#
+# resource "aws_s3_bucket_public_access_block" "app_uploads" {
+#   bucket = aws_s3_bucket.app_uploads.id
+#
+#   block_public_acls       = true
+#   block_public_policy     = true
+#   ignore_public_acls      = true
+#   restrict_public_buckets = true
+# }

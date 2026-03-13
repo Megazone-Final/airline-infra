@@ -14,5 +14,6 @@ Recommended ownership:
 - shared networking needed by the project
 
 Optional ECR, EKS, and frontend hosting examples are kept as documentation only in `terraform.tfvars.example`.
+Disabled S3 examples live in `s3.tf.example`; use them as reference only.
 
 Do not create parallel `dev` or `stage` stacks unless the project budget and operational model actually require them.
