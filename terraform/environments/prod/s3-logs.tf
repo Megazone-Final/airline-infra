@@ -10,7 +10,7 @@ resource "aws_s3_bucket_versioning" "airline_grafana_logs" {
   bucket = aws_s3_bucket.airline_grafana_logs.id
 
   versioning_configuration {
-    status = "Suspended"
+    status = "Disabled"
   }
 }
 
@@ -25,8 +25,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "airline_grafana_l
 }
 
 resource "aws_s3_bucket_public_access_block" "airline_grafana_logs" {
-  bucket = aws_s3_bucket.airline_grafana_logs.id
 
+  bucket = aws_s3_bucket.airline_grafana_logs.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
