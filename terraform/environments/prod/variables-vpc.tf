@@ -74,3 +74,9 @@ variable "pod_subnet_cidrs" {
     pod_private_2c = "100.64.1.0/24"
   }
 }
+
+variable "alb_cluster_name" {
+  description = "EKS cluster name used for ALB Controller subnet discovery tags."
+  type        = string
+  default     = "eks-an2-airline-main"
+}

@@ -1,5 +1,4 @@
 locals {
-  name_prefix = "${var.project_name}-${var.environment}"
   common_tags = merge(
     {
       Project     = var.project_name
@@ -20,6 +19,6 @@ module "vpc" {
   subnet_cidrs       = var.subnet_cidrs
   pod_secondary_cidr = var.pod_secondary_cidr
   pod_subnet_cidrs   = var.pod_subnet_cidrs
-  alb_cluster_name   = ""
+  alb_cluster_name   = var.alb_cluster_name
   tags               = local.common_tags
 }

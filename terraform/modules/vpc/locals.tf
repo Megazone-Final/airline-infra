@@ -3,7 +3,6 @@ locals {
     vpc            = join("-", ["vpc", var.region_code, var.project_name, "network", "main"])
     igw            = join("-", ["igw", var.region_code, var.project_name, "network", "main"])
     nat            = join("-", ["nat", var.region_code, var.project_name, "network", "regional"])
-    nat_eip        = join("-", ["eip", var.region_code, var.project_name, "network", "nat"])
     rt_public      = join("-", ["rt", var.region_code, var.project_name, "edge", "pub"])
     rt_private     = join("-", ["rt", var.region_code, var.project_name, "shared", "pri"])
     rt_db_private  = join("-", ["rt", var.region_code, var.project_name, "db", "pri"])

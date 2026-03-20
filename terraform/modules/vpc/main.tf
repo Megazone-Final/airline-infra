@@ -36,18 +36,10 @@ resource "aws_subnet" "primary" {
   })
 }
 
-resource "aws_eip" "nat" {
-  domain = "vpc"
-
-  tags = merge(var.tags, {
-    Name = local.names.nat_eip
-  })
-}
-
 resource "aws_nat_gateway" "regional" {
+  availability_mode = "regional"
   connectivity_type = "public"
-  allocation_id     = aws_eip.nat.id
-  subnet_id         = aws_subnet.primary[local.public_subnet_keys[0]].id
+  vpc_id            = aws_vpc.this.id
   depends_on        = [aws_internet_gateway.this]
 
   tags = merge(var.tags, {
