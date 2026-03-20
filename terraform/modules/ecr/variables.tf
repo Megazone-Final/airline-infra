@@ -24,7 +24,7 @@ variable "scan_on_push" {
 variable "keep_last_images" {
   description = "Number of tagged images to retain."
   type        = number
-  default     = 20
+  default     = 5
 }
 
 variable "tags" {
