@@ -10,7 +10,7 @@ variable "ecr_repository_names" {
   default = [
     "airline-backend/auth",
     "airline-backend/flights",
-    "airline-backend/payment",
+    "airline-backend/payments",
   ]
 }
 
