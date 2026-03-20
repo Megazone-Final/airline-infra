@@ -1,25 +1,25 @@
 variable "region_code" {
-  description = "Short region code used in the resource naming convention."
+  description = "Short region code used in resource naming."
   type        = string
 }
 
 variable "project_name" {
-  description = "Project name used in the resource naming convention."
+  description = "Project name used in resource naming."
   type        = string
 }
 
 variable "cidr_block" {
-  description = "CIDR block for the VPC."
+  description = "Primary CIDR block for the VPC."
   type        = string
 }
 
 variable "azs" {
-  description = "Availability zones keyed by short suffix (e.g. 2a, 2c)."
+  description = "Map of short AZ suffixes to AWS Availability Zone names."
   type        = map(string)
 }
 
 variable "subnet_cidrs" {
-  description = "Primary VPC subnet CIDRs."
+  description = "CIDR ranges for subnets created from the primary VPC CIDR."
   type = object({
     edge_public_2a  = string
     edge_public_2c  = string
@@ -31,12 +31,12 @@ variable "subnet_cidrs" {
 }
 
 variable "pod_secondary_cidr" {
-  description = "Secondary CIDR block for pod subnets."
+  description = "Secondary VPC CIDR block reserved for pod networking."
   type        = string
 }
 
 variable "pod_subnet_cidrs" {
-  description = "Pod subnet CIDRs from the secondary VPC CIDR."
+  description = "CIDR ranges for pod subnets carved from the secondary VPC CIDR."
   type = object({
     pod_private_2a = string
     pod_private_2c = string
@@ -44,25 +44,25 @@ variable "pod_subnet_cidrs" {
 }
 
 variable "alb_cluster_name" {
-  description = "EKS cluster name used for optional subnet discovery tag."
+  description = "Optional EKS cluster name used for ALB Controller subnet discovery tags."
   type        = string
   default     = ""
 }
 
 variable "enable_dns_support" {
-  description = "Whether the VPC supports DNS resolution."
+  description = "Whether DNS resolution is enabled for the VPC."
   type        = bool
   default     = true
 }
 
 variable "enable_dns_hostnames" {
-  description = "Whether instances in the VPC get public DNS hostnames."
+  description = "Whether instances in the VPC receive public DNS hostnames."
   type        = bool
   default     = true
 }
 
 variable "tags" {
-  description = "Tags applied to the VPC."
+  description = "Common tags applied to VPC-related resources."
   type        = map(string)
   default     = {}
 }

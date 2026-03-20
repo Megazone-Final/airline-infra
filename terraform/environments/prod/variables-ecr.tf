@@ -1,7 +1,7 @@
 variable "ecr_enabled" {
   description = "When true, create shared ECR repositories."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "ecr_repository_names" {
