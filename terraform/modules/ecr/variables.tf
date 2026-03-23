@@ -16,7 +16,7 @@ variable "image_tag_mutability" {
 }
 
 variable "scan_on_push" {
-  description = "Enable image scanning on push."
+  description = "Enable registry-level scan on push for the configured repositories."
   type        = bool
   default     = true
 }

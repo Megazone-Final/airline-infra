@@ -21,7 +21,7 @@ variable "ecr_image_tag_mutability" {
 }
 
 variable "ecr_scan_on_push" {
-  description = "Enable image scanning on push for shared ECR repositories."
+  description = "Enable registry-level scan on push for the shared ECR repositories."
   type        = bool
   default     = true
 }
