@@ -1,162 +1,190 @@
-resource "aws_cloudwatch_log_group" "this" {
-  count = var.enabled && length(var.cluster_log_types) > 0 ? 1 : 0
+data "aws_region" "current" {}
 
-  name              = "/aws/eks/${var.name}/cluster"
-  retention_in_days = var.cloudwatch_log_retention_in_days
+module "vpc_cni_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "~> 6.4"
 
-  tags = merge(var.tags, {
-    Name = "${var.name}-eks-logs"
-  })
-}
+  name            = local.names.vpc_cni_irsa
+  use_name_prefix = false
 
-resource "aws_iam_role" "cluster" {
-  count = var.enabled ? 1 : 0
+  attach_vpc_cni_policy = true
+  vpc_cni_enable_ipv4   = true
 
-  name = "${var.name}-eks-cluster-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "eks.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "cluster_eks_cluster_policy" {
-  count = var.enabled ? 1 : 0
-
-  role       = aws_iam_role.cluster[0].name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "cluster_vpc_resource_controller" {
-  count = var.enabled ? 1 : 0
-
-  role       = aws_iam_role.cluster[0].name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-}
-
-resource "aws_iam_role" "node" {
-  count = var.enabled ? 1 : 0
-
-  name = "${var.name}-${var.node_group_name}-node-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy_attachment" "node_eks_worker" {
-  count = var.enabled ? 1 : 0
-
-  role       = aws_iam_role.node[0].name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "node_cni" {
-  count = var.enabled ? 1 : 0
-
-  role       = aws_iam_role.node[0].name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-}
-
-resource "aws_iam_role_policy_attachment" "node_ecr_read_only" {
-  count = var.enabled ? 1 : 0
-
-  role       = aws_iam_role.node[0].name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-
-resource "aws_security_group" "cluster" {
-  count = var.enabled ? 1 : 0
-
-  name        = "${var.name}-eks-cluster"
-  description = "Cluster security group for ${var.name}"
-  vpc_id      = var.vpc_id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  oidc_providers = {
+    main = {
+      provider_arn               = module.cluster.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-node"]
+    }
   }
 
   tags = merge(var.tags, {
-    Name = "${var.name}-eks-cluster"
+    Name = local.names.vpc_cni_irsa
   })
 }
 
-resource "aws_eks_cluster" "this" {
-  count = var.enabled ? 1 : 0
+module "ebs_csi_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
+  version = "~> 6.4"
 
-  name     = var.name
-  role_arn = aws_iam_role.cluster[0].arn
-  version  = var.cluster_version
+  name            = local.names.ebs_csi_irsa
+  use_name_prefix = false
 
-  enabled_cluster_log_types = var.cluster_log_types
+  attach_ebs_csi_policy = true
 
-  vpc_config {
-    subnet_ids              = var.subnet_ids
-    endpoint_public_access  = var.endpoint_public_access
-    endpoint_private_access = var.endpoint_private_access
-    public_access_cidrs     = var.endpoint_public_access_cidrs
-    security_group_ids      = [aws_security_group.cluster[0].id]
+  oidc_providers = {
+    main = {
+      provider_arn               = module.cluster.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
   }
 
-  kubernetes_network_config {
-    service_ipv4_cidr = var.kubernetes_service_ipv4_cidr
-  }
-
-  depends_on = [
-    aws_iam_role_policy_attachment.cluster_eks_cluster_policy,
-    aws_iam_role_policy_attachment.cluster_vpc_resource_controller,
-    aws_cloudwatch_log_group.this,
-  ]
-
-  tags = var.tags
+  tags = merge(var.tags, {
+    Name = local.names.ebs_csi_irsa
+  })
 }
 
-resource "aws_eks_node_group" "this" {
-  count = var.enabled ? 1 : 0
+module "cluster" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 21.15"
 
-  cluster_name    = aws_eks_cluster.this[0].name
-  node_group_name = "${var.name}-${var.node_group_name}"
-  node_role_arn   = aws_iam_role.node[0].arn
-  subnet_ids      = var.subnet_ids
-  instance_types  = var.node_group_instance_types
-  capacity_type   = var.node_group_capacity_type
-  disk_size       = var.node_group_disk_size
+  name               = local.cluster_name
+  kubernetes_version = var.eks_cluster_version
 
-  scaling_config {
-    desired_size = var.node_group_desired_size
-    min_size     = var.node_group_min_size
-    max_size     = var.node_group_max_size
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
+  enable_irsa                              = true
+  endpoint_public_access                   = var.eks_endpoint_public_access
+  endpoint_private_access                  = var.eks_endpoint_private_access
+  endpoint_public_access_cidrs             = var.eks_endpoint_public_access_cidrs
+  enabled_log_types                        = var.eks_enabled_log_types
+  cloudwatch_log_group_retention_in_days   = var.eks_cloudwatch_log_retention_in_days
+  encryption_config                        = null
+  service_ipv4_cidr                        = var.eks_service_ipv4_cidr
+  vpc_id                                   = var.vpc_id
+  subnet_ids                               = local.node_subnet_ids
+  create_security_group                    = true
+  security_group_name                      = local.names.cluster_security_group
+  security_group_use_name_prefix           = false
+  security_group_description               = "EKS cluster security group for ${local.cluster_name}"
+  create_node_security_group               = true
+  node_security_group_name                 = local.names.node_security_group
+  node_security_group_use_name_prefix      = false
+  node_security_group_description          = "EKS node security group for ${local.cluster_name}"
+  iam_role_name                            = local.names.cluster_role
+  iam_role_use_name_prefix                 = false
+  iam_role_description                     = "IAM role for the ${local.cluster_name} EKS control plane"
+
+  security_group_additional_rules = {
+    ingress_nodes_443 = {
+      description                = "Allow node traffic to the EKS API"
+      protocol                   = "tcp"
+      from_port                  = 443
+      to_port                    = 443
+      type                       = "ingress"
+      source_node_security_group = true
+    }
+    ingress_self_all = {
+      description = "Allow cluster self traffic"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
   }
 
-  depends_on = [
-    aws_iam_role_policy_attachment.node_eks_worker,
-    aws_iam_role_policy_attachment.node_cni,
-    aws_iam_role_policy_attachment.node_ecr_read_only,
-  ]
+  addons = {
+    coredns = {}
+    eks-pod-identity-agent = {
+      before_compute = true
+    }
+    kube-proxy = {}
+    vpc-cni = {
+      before_compute = true
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION           = "true"
+          WARM_PREFIX_TARGET                 = tostring(var.eks_vpc_cni_warm_prefix_target)
+          AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"
+          ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone"
+        }
+      })
+      service_account_role_arn = module.vpc_cni_irsa.arn
+    }
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_irsa.arn
+    }
+  }
+
+  eks_managed_node_groups = {
+    (local.names.managed_node_group) = {
+      ami_type       = var.eks_managed_node_group_ami_type
+      instance_types = var.eks_managed_node_group_instance_types
+      capacity_type  = var.eks_managed_node_group_capacity_type
+      disk_size      = var.eks_managed_node_group_disk_size
+      subnet_ids     = local.node_subnet_ids
+
+      desired_size = var.eks_managed_node_group_desired_size
+      min_size     = var.eks_managed_node_group_min_size
+      max_size     = var.eks_managed_node_group_max_size
+
+      iam_role_name            = local.names.managed_node_role
+      iam_role_use_name_prefix = false
+      iam_role_description     = "IAM role for the ${local.names.managed_node_group} EKS managed node group"
+
+      iam_role_additional_policies = {
+        AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        AmazonEBSCSIDriverPolicy     = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
+
+      labels = {
+        role                      = "managed-nodegroup"
+        "karpenter.sh/controller" = "true"
+      }
+
+      tags = merge(var.tags, {
+        Name = local.names.managed_node_group
+      })
+    }
+  }
+
+  security_group_tags = merge(var.tags, {
+    Name = local.names.cluster_security_group
+  })
+
+  node_security_group_tags = merge(var.tags, {
+    Name = local.names.node_security_group
+  })
+
+  tags = merge(var.tags, {
+    Name = local.cluster_name
+  })
+}
+
+module "karpenter" {
+  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
+  version = "~> 21.15"
+
+  cluster_name    = module.cluster.cluster_name
+  region          = data.aws_region.current.region
+  namespace       = var.eks_karpenter_namespace
+  service_account = var.eks_karpenter_service_account_name
+
+  iam_role_name            = local.names.karpenter_controller
+  iam_role_use_name_prefix = false
+
+  node_iam_role_name            = local.names.karpenter_node
+  node_iam_role_use_name_prefix = false
+
+  queue_name       = local.names.karpenter_queue
+  rule_name_prefix = local.names.karpenter_rule_prefix
+
+  node_iam_role_additional_policies = {
+    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    AmazonEBSCSIDriverPolicy     = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  }
 
   tags = var.tags
+
+  depends_on = [module.cluster]
 }
