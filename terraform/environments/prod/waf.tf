@@ -7,8 +7,11 @@ module "waf_cloudfront" {
     aws = aws.us_east_1
   }
 
-  enabled      = var.waf_cloudfront_enabled
-  region_code  = var.region_code
-  project_name = var.project_name
-  tags         = local.common_tags
+  enabled                  = var.waf_cloudfront_enabled
+  region_code              = var.region_code
+  project_name             = var.project_name
+  admin_protection_enabled = var.waf_admin_protection_enabled
+  admin_host               = var.waf_admin_host
+  admin_allowed_ip_cidrs   = var.waf_admin_allowed_ip_cidrs
+  tags                     = local.common_tags
 }

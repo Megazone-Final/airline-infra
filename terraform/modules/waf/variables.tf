@@ -14,6 +14,24 @@ variable "project_name" {
   type        = string
 }
 
+variable "admin_protection_enabled" {
+  description = "When true, only allow configured IP ranges to access the admin host."
+  type        = bool
+  default     = true
+}
+
+variable "admin_host" {
+  description = "Optional admin host name protected by stricter WAF rules."
+  type        = string
+  default     = ""
+}
+
+variable "admin_allowed_ip_cidrs" {
+  description = "CIDR ranges allowed to access the admin host."
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Tags applied to the WAF resources."
   type        = map(string)

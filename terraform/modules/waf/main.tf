@@ -1,10 +1,28 @@
 locals {
-  cloudfront_name        = join("-", ["waf", var.region_code, var.project_name, "cf", "main"])
-  cloudfront_metric_name = join("-", ["waf", var.region_code, var.project_name, "cf", "main"])
-  iprep_metric_name      = join("-", ["waf", var.region_code, var.project_name, "cf", "iprep"])
-  common_metric_name     = join("-", ["waf", var.region_code, var.project_name, "cf", "common"])
-  knownbad_metric_name   = join("-", ["waf", var.region_code, var.project_name, "cf", "knownbad"])
-  sqli_metric_name       = join("-", ["waf", var.region_code, var.project_name, "cf", "sqli"])
+  cloudfront_name        = join("-", ["waf", var.region_code, var.project_name, "cloudfront"])
+  cloudfront_metric_name = join("-", ["waf", var.region_code, var.project_name, "cloudfront"])
+  iprep_metric_name      = join("-", ["waf", var.region_code, var.project_name, "cloudfront-iprep"])
+  common_metric_name     = join("-", ["waf", var.region_code, var.project_name, "cloudfront-common"])
+  knownbad_metric_name   = join("-", ["waf", var.region_code, var.project_name, "cloudfront-knownbad"])
+  sqli_metric_name       = join("-", ["waf", var.region_code, var.project_name, "cloudfront-sqli"])
+  admin_metric_name      = join("-", ["waf", var.region_code, var.project_name, "admin", "allow"])
+
+  normalized_admin_host       = lower(trimspace(var.admin_host))
+  admin_protection_configured = var.admin_protection_enabled && local.normalized_admin_host != "" && length(var.admin_allowed_ip_cidrs) > 0
+}
+
+resource "aws_wafv2_ip_set" "admin_allowed" {
+  count = local.admin_protection_configured ? 1 : 0
+
+  name               = join("-", ["ipset", var.region_code, var.project_name, "admin", "allow"])
+  description        = "Allowed client IP ranges for admin host access"
+  scope              = "CLOUDFRONT"
+  ip_address_version = "IPV4"
+  addresses          = var.admin_allowed_ip_cidrs
+
+  tags = merge(var.tags, {
+    Name = join("-", ["ipset", var.region_code, var.project_name, "admin", "allow"])
+  })
 }
 
 resource "aws_wafv2_web_acl" "cloudfront" {
@@ -106,6 +124,58 @@ resource "aws_wafv2_web_acl" "cloudfront" {
       cloudwatch_metrics_enabled = true
       metric_name                = local.sqli_metric_name
       sampled_requests_enabled   = true
+    }
+  }
+
+  dynamic "rule" {
+    for_each = local.admin_protection_configured ? [1] : []
+
+    content {
+      # admin 호스트로 들어오는 요청은 허용된 IP 대역에서만 접근할 수 있게 제한합니다.
+      name     = "AdminHostAllowlist"
+      priority = 5
+
+      action {
+        block {}
+      }
+
+      statement {
+        and_statement {
+          statement {
+            byte_match_statement {
+              field_to_match {
+                single_header {
+                  name = "host"
+                }
+              }
+
+              positional_constraint = "EXACTLY"
+              search_string         = local.normalized_admin_host
+
+              text_transformation {
+                priority = 0
+                type     = "LOWERCASE"
+              }
+            }
+          }
+
+          statement {
+            not_statement {
+              statement {
+                ip_set_reference_statement {
+                  arn = aws_wafv2_ip_set.admin_allowed[0].arn
+                }
+              }
+            }
+          }
+        }
+      }
+
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = local.admin_metric_name
+        sampled_requests_enabled   = true
+      }
     }
   }
 
