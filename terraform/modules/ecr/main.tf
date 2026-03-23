@@ -8,13 +8,33 @@ resource "aws_ecr_repository" "this" {
     encryption_type = "KMS"
   }
 
-  image_scanning_configuration {
-    scan_on_push = var.scan_on_push
-  }
-
   tags = merge(var.tags, {
     Name = each.value
   })
+}
+
+# 레지스트리 수준 스캐닝이 deprecated 된 리포지토리 수준 scan_on_push 설정을 대체합니다.
+resource "aws_ecr_registry_scanning_configuration" "this" {
+  count = var.enabled ? 1 : 0
+
+  scan_type = "BASIC"
+
+  dynamic "rule" {
+    for_each = var.scan_on_push ? [1] : []
+
+    content {
+      scan_frequency = "SCAN_ON_PUSH"
+
+      dynamic "repository_filter" {
+        for_each = toset(var.repository_names)
+
+        content {
+          filter      = repository_filter.value
+          filter_type = "WILDCARD"
+        }
+      }
+    }
+  }
 }
 
 resource "aws_ecr_lifecycle_policy" "this" {
