@@ -1,7 +1,7 @@
 variable "ecr_enabled" {
   description = "When true, create shared ECR repositories."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "ecr_repository_names" {
@@ -9,8 +9,8 @@ variable "ecr_repository_names" {
   type        = list(string)
   default = [
     "airline-backend/auth",
-    "airline-backend/flights",
-    "airline-backend/payments",
+    "airline-backend/flight",
+    "airline-backend/payment",
   ]
 }
 
@@ -29,5 +29,5 @@ variable "ecr_scan_on_push" {
 variable "ecr_keep_last_images" {
   description = "Number of tagged images to keep per shared ECR repository."
   type        = number
-  default     = 20
+  default     = 5
 }
