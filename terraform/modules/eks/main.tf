@@ -51,7 +51,7 @@ module "cluster" {
   kubernetes_version = var.eks_cluster_version
 
   authentication_mode                      = "API_AND_CONFIG_MAP"
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = false
   enable_irsa                              = true
   endpoint_public_access                   = var.eks_endpoint_public_access
   endpoint_private_access                  = var.eks_endpoint_private_access
@@ -117,20 +117,21 @@ module "cluster" {
   }
 
   eks_managed_node_groups = {
-    (local.names.managed_node_group) = {
+    for az_suffix, config in local.baseline_managed_node_groups :
+    config.name => {
       ami_type       = var.eks_managed_node_group_ami_type
       instance_types = var.eks_managed_node_group_instance_types
       capacity_type  = var.eks_managed_node_group_capacity_type
       disk_size      = var.eks_managed_node_group_disk_size
-      subnet_ids     = local.node_subnet_ids
+      subnet_ids     = [config.subnet_id]
 
       desired_size = var.eks_managed_node_group_desired_size
       min_size     = var.eks_managed_node_group_min_size
       max_size     = var.eks_managed_node_group_max_size
 
-      iam_role_name            = local.names.managed_node_role
+      iam_role_name            = config.iam_role_name
       iam_role_use_name_prefix = false
-      iam_role_description     = "IAM role for the ${local.names.managed_node_group} EKS managed node group"
+      iam_role_description     = "IAM role for the ${config.name} EKS managed node group"
 
       iam_role_additional_policies = {
         AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -143,7 +144,7 @@ module "cluster" {
       }
 
       tags = merge(var.tags, {
-        Name = local.names.managed_node_group
+        Name = config.name
       })
     }
   }
@@ -159,6 +160,28 @@ module "cluster" {
   tags = merge(var.tags, {
     Name = local.cluster_name
   })
+}
+
+resource "aws_eks_access_entry" "cluster_admin" {
+  for_each = var.cluster_admin_principal_arns
+
+  cluster_name  = module.cluster.cluster_name
+  principal_arn = each.value
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "cluster_admin" {
+  for_each = var.cluster_admin_principal_arns
+
+  cluster_name  = module.cluster.cluster_name
+  principal_arn = each.value
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.cluster_admin]
 }
 
 module "karpenter" {

@@ -1,0 +1,1 @@
+{infra type}-{region}-{project name}-{service_name}-{version/type}
