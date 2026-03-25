@@ -13,6 +13,11 @@ output "cluster_endpoint" {
   value       = module.cluster.cluster_endpoint
 }
 
+output "cluster_certificate_authority_data" {
+  description = "Base64-encoded certificate authority data for the shared EKS cluster."
+  value       = module.cluster.cluster_certificate_authority_data
+}
+
 output "cluster_oidc_issuer_url" {
   description = "OIDC issuer URL used by the shared EKS cluster."
   value       = module.cluster.cluster_oidc_issuer_url
@@ -97,3 +102,5 @@ output "karpenter_node_name" {
   description = "Name tag applied to Karpenter-created nodes."
   value       = local.names.karpenter_node_name
 }
+
+

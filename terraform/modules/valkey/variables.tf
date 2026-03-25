@@ -18,12 +18,6 @@ variable "security_group_ids" {
   type        = list(string)
 }
 
-variable "session_password" {
-  description = "Password for the session Valkey cluster."
-  type        = string
-  sensitive   = true
-}
-
 variable "tags" {
   description = "Common tags applied to all Valkey resources."
   type        = map(string)

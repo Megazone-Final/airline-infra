@@ -45,9 +45,9 @@ resource "aws_ecr_lifecycle_policy" "this" {
     rules = [
       {
         rulePriority = 1
-        description  = "Expire images beyond the most recent tagged set"
+        description  = "Expire images beyond the most recent set"
         selection = {
-          tagStatus   = "tagged"
+          tagStatus   = "any"
           countType   = "imageCountMoreThan"
           countNumber = var.keep_last_images
         }
