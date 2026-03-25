@@ -15,7 +15,7 @@ resource "aws_elasticache_subnet_group" "valkey_subnet_group" {
 # 1. Session Valkey Cluster (Password-based authentication)
 # -------------------------------------------------------
 
-# Session User (Password auth)
+# Session User (IAM auth)
 resource "aws_elasticache_user" "valkey_session_user" {
   user_id       = local.names.session_user
   user_name     = local.names.session_user
@@ -23,8 +23,7 @@ resource "aws_elasticache_user" "valkey_session_user" {
   access_string = "on ~* +@all -flushall -flushdb"
 
   authentication_mode {
-    type      = "password"
-    passwords = [var.session_password]
+    type = "iam"
   }
 }
 
