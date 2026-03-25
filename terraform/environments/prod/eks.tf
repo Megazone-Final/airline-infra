@@ -41,7 +41,9 @@ module "eks_addons" {
   cluster_name                       = module.eks.cluster_name
   cluster_endpoint                   = module.eks.cluster_endpoint
   node_security_group_id             = module.eks.node_security_group_id
+  node_security_group_name_tag       = module.eks.node_security_group_name_tag
   node_subnet_ids                    = module.eks.node_subnet_ids
+  node_subnet_name_tags              = module.eks.node_subnet_name_tags
   pod_eni_configs                    = module.eks.pod_eni_configs
   eks_karpenter_chart_version        = var.eks_karpenter_chart_version
   eks_karpenter_namespace            = var.eks_karpenter_namespace

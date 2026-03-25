@@ -9,7 +9,7 @@ resource "aws_security_group" "valkey_sg" {
   ingress {
     description = "Allow Valkey from EKS Pods and inner VPC"
     from_port   = 6379
-    to_port     = 6380   # Valkey Session(6379) or maybe auth uses other? We just open 6379-6380
+    to_port     = 6380 # Valkey Session(6379) or maybe auth uses other? We just open 6379-6380
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16", "100.64.0.0/16"]
   }
