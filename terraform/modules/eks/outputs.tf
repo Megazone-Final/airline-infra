@@ -38,14 +38,17 @@ output "node_security_group_id" {
   value       = module.cluster.node_security_group_id
 }
 
-output "managed_node_group_name" {
-  description = "Name of the baseline EKS managed node group."
-  value       = local.names.managed_node_group
+output "managed_node_group_names" {
+  description = "Names of the baseline EKS managed node groups."
+  value       = [for config in values(local.baseline_managed_node_groups) : config.name]
 }
 
-output "managed_node_role_arn" {
-  description = "IAM role ARN used by the baseline EKS managed node group."
-  value       = module.cluster.eks_managed_node_groups[local.names.managed_node_group].iam_role_arn
+output "managed_node_role_arns" {
+  description = "IAM role ARNs used by the baseline EKS managed node groups."
+  value = {
+    for group_name, group in module.cluster.eks_managed_node_groups :
+    group_name => group.iam_role_arn
+  }
 }
 
 output "node_subnet_ids" {
@@ -56,6 +59,11 @@ output "node_subnet_ids" {
 output "pod_eni_configs" {
   description = "Map of availability zone name to pod subnet ID used by ENIConfig."
   value       = local.pod_eni_configs
+}
+
+output "eni_config_names" {
+  description = "ENIConfig names created for pod networking."
+  value       = sort(keys(local.pod_eni_configs))
 }
 
 output "vpc_cni_irsa_role_arn" {
@@ -103,4 +111,7 @@ output "karpenter_node_name" {
   value       = local.names.karpenter_node_name
 }
 
-
+output "karpenter_namespace" {
+  description = "Namespace where Karpenter is deployed."
+  value       = kubernetes_namespace.karpenter.metadata[0].name
+}

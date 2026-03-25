@@ -1,5 +1,0 @@
-# Disabled reference file.
-# Active VPC output file: outputs-vpc.tf
-#
-# This file is kept only so you can compare the old generic naming
-# (`outputs.tf`) with the VPC-specific layout.

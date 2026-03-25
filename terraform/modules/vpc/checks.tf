@@ -61,11 +61,29 @@ check "valid_subnet_configuration" {
     condition = alltrue([
       for subnet in values(local.subnet_definitions) :
       can(cidrnetmask(subnet.cidr_block))
-      && contains(["public", "private"], subnet.tier)
-      && contains(["public", "private", "db_private", "pod_private"], subnet.route_table)
-      && contains(["primary", "secondary"], subnet.address_family)
+      && (
+        subnet.address_family == "primary"
+        ? (
+          (
+            subnet.route_table == "public"
+            && subnet.tier == "public"
+            && subnet.map_public_ip_on_launch
+          )
+          || (
+            contains(["private", "db_private"], subnet.route_table)
+            && subnet.tier == "private"
+            && !subnet.map_public_ip_on_launch
+          )
+        )
+        : (
+          subnet.address_family == "secondary"
+          && subnet.route_table == "pod_private"
+          && subnet.tier == "private"
+          && !subnet.map_public_ip_on_launch
+        )
+      )
     ])
-    error_message = "Every subnet must use a valid CIDR and supported tier, route_table, and address_family values."
+    error_message = "Subnet topology is invalid. Public primary subnets must use the public route table and public IP mapping. Private primary subnets must use private/db_private route tables without public IP mapping. Secondary subnets must use the pod_private route table."
   }
 }
 

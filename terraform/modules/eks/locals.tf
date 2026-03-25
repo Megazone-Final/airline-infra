@@ -22,6 +22,14 @@ locals {
   node_subnet_ids = [
     for key in local.node_subnet_keys : var.node_private_subnet_ids[key]
   ]
+  baseline_managed_node_groups = {
+    for subnet_key in local.node_subnet_keys :
+    replace(subnet_key, "node_private_", "") => {
+      name          = "${local.names.managed_node_group}-${replace(subnet_key, "node_private_", "")}"
+      subnet_id     = var.node_private_subnet_ids[subnet_key]
+      iam_role_name = "${local.names.managed_node_role}-${replace(subnet_key, "node_private_", "")}"
+    }
+  }
 
   pod_subnet_keys = sort(keys(var.pod_private_subnet_ids))
   pod_eni_configs = {
