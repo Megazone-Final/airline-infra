@@ -2,7 +2,7 @@
 # Active VPC entrypoint: vpc.tf
 
 # This file is kept only so you can compare the old generic naming
-# (`main.tf`) with the new VPC-specific layout.
+# (`main.tf`) with the VPC-specific layout.
 
 # locals {
 #   name_prefix = "${var.project_name}-${var.environment}"
@@ -18,14 +18,12 @@
 
 # module "vpc" {
 #   source = "../../modules/vpc"
-
+#
 #   region_code        = var.region_code
 #   project_name       = var.project_name
 #   cidr_block         = var.cidr_block
-#   azs                = var.azs
-#   subnet_cidrs       = var.subnet_cidrs
 #   pod_secondary_cidr = var.pod_secondary_cidr
-#   pod_subnet_cidrs   = var.pod_subnet_cidrs
-#   alb_cluster_name   = ""
+#   subnets            = var.subnets
+#   subnet_tags        = {}
 #   tags               = local.common_tags
 # }

@@ -1,0 +1,5 @@
+# Disabled reference file.
+# Active VPC variable file: variables-vpc.tf
+
+# This file is kept only so you can compare the old generic naming
+# (`variables.tf`) with the VPC-specific layout.

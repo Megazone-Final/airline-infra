@@ -56,9 +56,11 @@ resource "aws_route_table_association" "primary" {
   for_each = local.primary_subnets
 
   subnet_id = aws_subnet.primary[each.key].id
-  route_table_id = each.value.route_table == "public" ? aws_route_table.public.id : (
-    each.value.route_table == "db_private" ? aws_route_table.db_private.id : aws_route_table.private.id
-  )
+  route_table_id = {
+    public     = aws_route_table.public.id
+    private    = aws_route_table.private.id
+    db_private = aws_route_table.db_private.id
+  }[each.value.route_table]
 }
 
 resource "aws_route_table_association" "pod" {

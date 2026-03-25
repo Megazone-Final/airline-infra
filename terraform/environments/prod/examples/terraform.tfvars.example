@@ -1,0 +1,7 @@
+# This environment currently creates only the shared VPC.
+
+# Networking inputs now follow the topology defined in ../../modules/vpc.
+# Default values already match the agreed 10.0.0.0/24 primary CIDR and
+# 100.64.0.0/23 pod CIDR design.
+# Override cidr_block, pod_secondary_cidr, or subnets here only if your
+# live environment uses values different from variables-vpc.tf defaults.

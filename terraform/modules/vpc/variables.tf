@@ -13,40 +13,23 @@ variable "cidr_block" {
   type        = string
 }
 
-variable "azs" {
-  description = "Map of short AZ suffixes to AWS Availability Zone names."
-  type        = map(string)
-}
-
-variable "subnet_cidrs" {
-  description = "CIDR ranges for subnets created from the primary VPC CIDR."
-  type = object({
-    edge_public_2a  = string
-    edge_public_2c  = string
-    node_private_2a = string
-    node_private_2c = string
-    db_private_2a   = string
-    db_private_2c   = string
-  })
-}
-
 variable "pod_secondary_cidr" {
   description = "Secondary VPC CIDR block reserved for pod networking."
   type        = string
 }
 
-variable "pod_subnet_cidrs" {
-  description = "CIDR ranges for pod subnets carved from the secondary VPC CIDR."
-  type = object({
-    pod_private_2a = string
-    pod_private_2c = string
-  })
-}
-
-variable "alb_cluster_name" {
-  description = "Optional EKS cluster name used for ALB Controller subnet discovery tags."
-  type        = string
-  default     = ""
+variable "subnets" {
+  description = "Subnet definitions keyed by logical subnet name."
+  type = map(object({
+    name                    = string
+    cidr_block              = string
+    availability_zone       = string
+    tier                    = string
+    role                    = string
+    route_table             = string
+    map_public_ip_on_launch = bool
+    address_family          = string
+  }))
 }
 
 variable "enable_dns_support" {
@@ -64,5 +47,11 @@ variable "enable_dns_hostnames" {
 variable "tags" {
   description = "Common tags applied to VPC-related resources."
   type        = map(string)
+  default     = {}
+}
+
+variable "subnet_tags" {
+  description = "Additional tags applied per subnet key."
+  type        = map(map(string))
   default     = {}
 }

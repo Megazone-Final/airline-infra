@@ -1,13 +1,12 @@
-# 예시 파일입니다.
-# 확장자가 `.tf.example` 이므로 Terraform이 읽지 않습니다.
+# Example file.
+# The `.tf.example` extension prevents Terraform from loading it automatically.
 #
-# 목적:
-# - 현재 vpc.tf 로 만들어진 VPC 위에 EKS 모듈을 붙일 때 참고하는 예시
-# - node private subnet 을 EKS node subnet 으로 사용하는 구조
+# Purpose:
+# - show how to attach the EKS module to the VPC created by `vpc.tf`
+# - use node private subnets as EKS node subnets
 #
-# 전제:
-# - vpc.tf / variables-vpc.tf 가 이미 활성화되어 있어야 합니다.
-# - 실제 적용 전에는 클러스터 버전, 인스턴스 타입, 접속 CIDR 등을 팀 기준에 맞게 조정해야 합니다.
+# Before using this example in a live environment, adjust the cluster version,
+# instance types, and allowed access CIDRs to match your team standards.
 
 # locals {
 #   eks_cluster_name = "${local.name_prefix}-eks"
@@ -41,6 +40,8 @@
 #   tags                             = local.common_tags
 # }
 #
-# 참고:
-# - ALB Controller subnet discovery tag 가 필요하면 vpc.tf 의 alb_cluster_name 도 함께 연결해야 합니다.
-# - 운영에서는 endpoint_public_access_cidrs 를 회사 고정 IP 대역으로 제한하는 편이 안전합니다.
+# Notes:
+# - If you need ALB Controller subnet discovery tags, build them in `vpc.tf`
+#   via `local.vpc_subnet_tags` and pass them as `subnet_tags`.
+# - In production, it is safer to restrict `endpoint_public_access_cidrs`
+#   to fixed company IP ranges.

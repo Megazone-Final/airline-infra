@@ -37,41 +37,105 @@ variable "azs" {
   }
 }
 
-variable "subnet_cidrs" {
-  description = "Primary VPC subnet CIDRs keyed by subnet role and AZ."
-  type = object({
-    edge_public_2a  = string
-    edge_public_2c  = string
-    node_private_2a = string
-    node_private_2c = string
-    db_private_2a   = string
-    db_private_2c   = string
-  })
-  default = {
-    edge_public_2a  = "10.0.0.0/27"
-    edge_public_2c  = "10.0.0.32/27"
-    node_private_2a = "10.0.0.64/26"
-    node_private_2c = "10.0.0.128/26"
-    db_private_2a   = "10.0.0.192/28"
-    db_private_2c   = "10.0.0.208/28"
-  }
-}
-
 variable "pod_secondary_cidr" {
   description = "Secondary CIDR block associated with the VPC for pod networking."
   type        = string
   default     = "100.64.0.0/23"
 }
 
-variable "pod_subnet_cidrs" {
-  description = "Pod subnet CIDRs carved from the secondary VPC CIDR."
-  type = object({
-    pod_private_2a = string
-    pod_private_2c = string
-  })
+variable "subnets" {
+  description = "Subnet topology for the shared VPC."
+  type = map(object({
+    name                    = string
+    cidr_block              = string
+    availability_zone       = string
+    tier                    = string
+    role                    = string
+    route_table             = string
+    map_public_ip_on_launch = bool
+    address_family          = string
+  }))
   default = {
-    pod_private_2a = "100.64.0.0/24"
-    pod_private_2c = "100.64.1.0/24"
+    edge_public_2a = {
+      name                    = "subnet-an2-airline-edge-pub-2a"
+      cidr_block              = "10.0.0.0/27"
+      availability_zone       = "ap-northeast-2a"
+      tier                    = "public"
+      role                    = "edge"
+      route_table             = "public"
+      map_public_ip_on_launch = true
+      address_family          = "primary"
+    }
+    edge_public_2c = {
+      name                    = "subnet-an2-airline-edge-pub-2c"
+      cidr_block              = "10.0.0.32/27"
+      availability_zone       = "ap-northeast-2c"
+      tier                    = "public"
+      role                    = "edge"
+      route_table             = "public"
+      map_public_ip_on_launch = true
+      address_family          = "primary"
+    }
+    node_private_2a = {
+      name                    = "subnet-an2-airline-node-pri-2a"
+      cidr_block              = "10.0.0.64/26"
+      availability_zone       = "ap-northeast-2a"
+      tier                    = "private"
+      role                    = "node"
+      route_table             = "private"
+      map_public_ip_on_launch = false
+      address_family          = "primary"
+    }
+    node_private_2c = {
+      name                    = "subnet-an2-airline-node-pri-2c"
+      cidr_block              = "10.0.0.128/26"
+      availability_zone       = "ap-northeast-2c"
+      tier                    = "private"
+      role                    = "node"
+      route_table             = "private"
+      map_public_ip_on_launch = false
+      address_family          = "primary"
+    }
+    db_private_2a = {
+      name                    = "subnet-an2-airline-db-pri-2a"
+      cidr_block              = "10.0.0.192/28"
+      availability_zone       = "ap-northeast-2a"
+      tier                    = "private"
+      role                    = "db"
+      route_table             = "db_private"
+      map_public_ip_on_launch = false
+      address_family          = "primary"
+    }
+    db_private_2c = {
+      name                    = "subnet-an2-airline-db-pri-2c"
+      cidr_block              = "10.0.0.208/28"
+      availability_zone       = "ap-northeast-2c"
+      tier                    = "private"
+      role                    = "db"
+      route_table             = "db_private"
+      map_public_ip_on_launch = false
+      address_family          = "primary"
+    }
+    pod_private_2a = {
+      name                    = "subnet-an2-airline-pod-pri-2a"
+      cidr_block              = "100.64.0.0/24"
+      availability_zone       = "ap-northeast-2a"
+      tier                    = "private"
+      role                    = "pod"
+      route_table             = "pod_private"
+      map_public_ip_on_launch = false
+      address_family          = "secondary"
+    }
+    pod_private_2c = {
+      name                    = "subnet-an2-airline-pod-pri-2c"
+      cidr_block              = "100.64.1.0/24"
+      availability_zone       = "ap-northeast-2c"
+      tier                    = "private"
+      role                    = "pod"
+      route_table             = "pod_private"
+      map_public_ip_on_launch = false
+      address_family          = "secondary"
+    }
   }
 }
 
