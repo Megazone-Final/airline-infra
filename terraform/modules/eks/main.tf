@@ -74,24 +74,37 @@ module "cluster" {
   iam_role_use_name_prefix                 = false
   iam_role_description                     = "IAM role for the ${local.cluster_name} EKS control plane"
 
-  security_group_additional_rules = {
-    ingress_nodes_443 = {
-      description                = "Allow node traffic to the EKS API"
-      protocol                   = "tcp"
-      from_port                  = 443
-      to_port                    = 443
-      type                       = "ingress"
-      source_node_security_group = true
+  security_group_additional_rules = merge(
+    {
+      ingress_nodes_443 = {
+        description                = "Allow node traffic to the EKS API"
+        protocol                   = "tcp"
+        from_port                  = 443
+        to_port                    = 443
+        type                       = "ingress"
+        source_node_security_group = true
+      }
+      ingress_self_all = {
+        description = "Allow cluster self traffic"
+        protocol    = "-1"
+        from_port   = 0
+        to_port     = 0
+        type        = "ingress"
+        self        = true
+      }
+    },
+    {
+      for index, security_group_id in var.eks_api_allowed_security_group_ids :
+      "ingress_admin_${index}_443" => {
+        description              = "Allow admin traffic to the EKS API from ${security_group_id}"
+        protocol                 = "tcp"
+        from_port                = 443
+        to_port                  = 443
+        type                     = "ingress"
+        source_security_group_id = security_group_id
+      }
     }
-    ingress_self_all = {
-      description = "Allow cluster self traffic"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 0
-      type        = "ingress"
-      self        = true
-    }
-  }
+  )
 
   addons = {
     coredns = {}

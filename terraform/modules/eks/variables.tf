@@ -46,6 +46,12 @@ variable "cluster_admin_access_ready_wait_duration" {
   default     = "60s"
 }
 
+variable "eks_api_allowed_security_group_ids" {
+  description = "Additional security group IDs allowed to reach the private EKS API endpoint on port 443."
+  type        = list(string)
+  default     = []
+}
+
 variable "eks_cluster_version" {
   description = "Kubernetes version for the shared EKS cluster."
   type        = string

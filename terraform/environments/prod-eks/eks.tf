@@ -11,6 +11,7 @@ module "eks" {
   cluster_admin_principal_arns = {
     workstation = var.workstation_eks_admin_role_arn
   }
+  eks_api_allowed_security_group_ids = var.workstation_security_group_ids
 
   eks_cluster_version                   = var.eks_cluster_version
   eks_service_ipv4_cidr                 = var.eks_service_ipv4_cidr
