@@ -19,8 +19,14 @@ permissions:
 
 jobs:
   terraform:
-    name: "Terraform (prod)"
+    name: "Terraform (${{ matrix.stack_name }})"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - stack_name: prod-vpc
+            stack_dir: terraform/environments/prod-vpc
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,16 +47,16 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform -chdir=terraform/environments/prod init
+        run: terraform -chdir=${{ matrix.stack_dir }} init
 
       - name: Terraform Validate
         id: validate
-        run: terraform -chdir=terraform/environments/prod validate -no-color
+        run: terraform -chdir=${{ matrix.stack_dir }} validate -no-color
 
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
-        run: terraform -chdir=terraform/environments/prod plan -no-color
+        run: terraform -chdir=${{ matrix.stack_dir }} plan -no-color
         continue-on-error: true
 
       - name: Comment PR with Plan
@@ -61,7 +67,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Format 🖌 \`${{ steps.fmt.outcome }}\`
+            const output = `### Terraform \`${{ matrix.stack_name }}\`
+            #### Terraform Format 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Init ⚙️ \`${{ steps.init.outcome }}\`
             #### Terraform Validate 🤖 \`${{ steps.validate.outcome }}\`
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
@@ -89,4 +96,4 @@ jobs:
       # Keep the pull_request plan + PR comment flow above for review visibility.
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform -chdir=terraform/environments/prod apply -auto-approve
+      #   run: terraform -chdir=${{ matrix.stack_dir }} apply -auto-approve
