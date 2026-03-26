@@ -40,6 +40,12 @@ variable "cluster_admin_principal_arns" {
   default     = {}
 }
 
+variable "cluster_admin_access_ready_wait_duration" {
+  description = "How long Terraform waits after creating EKS access entries before applying in-cluster resources."
+  type        = string
+  default     = "60s"
+}
+
 variable "eks_cluster_version" {
   description = "Kubernetes version for the shared EKS cluster."
   type        = string

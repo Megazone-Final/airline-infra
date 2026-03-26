@@ -14,5 +14,8 @@ terraform {
     kubectl = {
       source = "gavinbunney/kubectl"
     }
+    time = {
+      source = "hashicorp/time"
+    }
   }
 }

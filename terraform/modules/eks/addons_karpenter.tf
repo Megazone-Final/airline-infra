@@ -17,7 +17,7 @@ resource "kubernetes_namespace" "karpenter" {
 
   depends_on = [
     module.cluster,
-    aws_eks_access_policy_association.cluster_admin,
+    time_sleep.cluster_admin_access_ready,
   ]
 }
 
@@ -85,7 +85,7 @@ resource "kubectl_manifest" "karpenter_ec2_node_class" {
 
   depends_on = [
     helm_release.karpenter,
-    aws_eks_access_policy_association.cluster_admin,
+    time_sleep.cluster_admin_access_ready,
   ]
 }
 
@@ -132,6 +132,6 @@ resource "kubectl_manifest" "karpenter_node_pool" {
 
   depends_on = [
     kubectl_manifest.karpenter_ec2_node_class,
-    aws_eks_access_policy_association.cluster_admin,
+    time_sleep.cluster_admin_access_ready,
   ]
 }

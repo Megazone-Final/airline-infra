@@ -14,6 +14,6 @@ resource "kubectl_manifest" "eni_config" {
   })
 
   depends_on = [
-    aws_eks_access_policy_association.cluster_admin,
+    time_sleep.cluster_admin_access_ready,
   ]
 }
