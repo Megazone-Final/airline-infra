@@ -28,6 +28,12 @@ variable "workstation_eks_admin_role_arn" {
   default     = "arn:aws:iam::036333380579:role/iam-global-airline-ssm"
 }
 
+variable "workstation_security_group_ids" {
+  description = "Security group IDs attached to workstation EC2 instances that need private EKS API access."
+  type        = list(string)
+  default     = ["sg-055d55475a303704c"]
+}
+
 variable "tags" {
   description = "Additional tags applied to supported resources."
   type        = map(string)
