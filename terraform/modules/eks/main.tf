@@ -184,6 +184,18 @@ resource "aws_eks_access_policy_association" "cluster_admin" {
   depends_on = [aws_eks_access_entry.cluster_admin]
 }
 
+resource "time_sleep" "cluster_admin_access_ready" {
+  create_duration = var.cluster_admin_access_ready_wait_duration
+
+  triggers = {
+    cluster_name             = module.cluster.cluster_name
+    cluster_endpoint         = module.cluster.cluster_endpoint
+    cluster_admin_principals = jsonencode(var.cluster_admin_principal_arns)
+  }
+
+  depends_on = [aws_eks_access_policy_association.cluster_admin]
+}
+
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "~> 21.15"
@@ -209,5 +221,8 @@ module "karpenter" {
 
   tags = var.tags
 
-  depends_on = [module.cluster]
+  depends_on = [
+    module.cluster,
+    time_sleep.cluster_admin_access_ready,
+  ]
 }
