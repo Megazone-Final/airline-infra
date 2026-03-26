@@ -106,16 +106,10 @@ variable "eks_karpenter_ami_family" {
   default     = "AL2023"
 }
 
-variable "eks_karpenter_ami_alias" {
-  description = "Karpenter AMI alias used when a fixed AMI ID is not supplied."
-  type        = string
-  default     = "al2023@latest"
-}
-
 variable "eks_karpenter_ami_id" {
-  description = "Optional fixed AMI ID for Karpenter nodes. Leave null to use eks_karpenter_ami_alias."
+  description = "Optional fixed AMI ID for Karpenter nodes. Leave null to use the same EKS optimized AMI as the managed node group."
   type        = string
-  default     = "ami-0ecfdfd1c8ae01aec"
+  default     = null
   nullable    = true
 }
 

@@ -13,6 +13,16 @@ output "eks_cluster_endpoint" {
   value       = module.eks.cluster_endpoint
 }
 
+output "eks_cluster_admin_principal_arns" {
+  description = "IAM principal ARNs granted cluster-admin access before in-cluster resources are applied."
+  value       = module.eks.cluster_admin_principal_arns
+}
+
+output "eks_api_allowed_security_group_ids" {
+  description = "Security group IDs allowed to reach the private EKS API endpoint on port 443."
+  value       = module.eks.eks_api_allowed_security_group_ids
+}
+
 output "eks_cluster_oidc_provider_arn" {
   description = "OIDC provider ARN used by the shared EKS cluster."
   value       = module.eks.oidc_provider_arn

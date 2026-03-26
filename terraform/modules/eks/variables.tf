@@ -41,7 +41,7 @@ variable "cluster_admin_principal_arns" {
 }
 
 variable "cluster_admin_access_ready_wait_duration" {
-  description = "How long Terraform waits after creating EKS access entries before applying in-cluster resources."
+  description = "Maximum time Terraform waits for cluster-admin access to become usable before applying in-cluster resources."
   type        = string
   default     = "60s"
 }
@@ -142,13 +142,8 @@ variable "eks_karpenter_ami_family" {
   type        = string
 }
 
-variable "eks_karpenter_ami_alias" {
-  description = "Karpenter AMI alias used when a fixed AMI ID is not supplied."
-  type        = string
-}
-
 variable "eks_karpenter_ami_id" {
-  description = "Optional fixed AMI ID for Karpenter nodes."
+  description = "Optional fixed AMI ID for Karpenter nodes. Leave null to use the same EKS optimized AMI as the managed node group."
   type        = string
   default     = null
   nullable    = true

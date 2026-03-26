@@ -58,7 +58,7 @@ module "cluster" {
   endpoint_public_access_cidrs             = var.eks_endpoint_public_access_cidrs
   enabled_log_types                        = var.eks_enabled_log_types
   cloudwatch_log_group_retention_in_days   = var.eks_cloudwatch_log_retention_in_days
-  encryption_config                        = null
+  encryption_config                        = { resources = ["secrets"] }
   service_ipv4_cidr                        = var.eks_service_ipv4_cidr
   vpc_id                                   = var.vpc_id
   subnet_ids                               = local.node_subnet_ids
@@ -74,37 +74,7 @@ module "cluster" {
   iam_role_use_name_prefix                 = false
   iam_role_description                     = "IAM role for the ${local.cluster_name} EKS control plane"
 
-  security_group_additional_rules = merge(
-    {
-      ingress_nodes_443 = {
-        description                = "Allow node traffic to the EKS API"
-        protocol                   = "tcp"
-        from_port                  = 443
-        to_port                    = 443
-        type                       = "ingress"
-        source_node_security_group = true
-      }
-      ingress_self_all = {
-        description = "Allow cluster self traffic"
-        protocol    = "-1"
-        from_port   = 0
-        to_port     = 0
-        type        = "ingress"
-        self        = true
-      }
-    },
-    {
-      for index, security_group_id in var.eks_api_allowed_security_group_ids :
-      "ingress_admin_${index}_443" => {
-        description              = "Allow admin traffic to the EKS API from ${security_group_id}"
-        protocol                 = "tcp"
-        from_port                = 443
-        to_port                  = 443
-        type                     = "ingress"
-        source_security_group_id = security_group_id
-      }
-    }
-  )
+  security_group_additional_rules = local.cluster_security_group_additional_rules
 
   addons = {
     coredns = {}
@@ -146,10 +116,7 @@ module "cluster" {
       iam_role_use_name_prefix = false
       iam_role_description     = "IAM role for the ${config.name} EKS managed node group"
 
-      iam_role_additional_policies = {
-        AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-        AmazonEBSCSIDriverPolicy     = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-      }
+      iam_role_additional_policies = local.managed_node_additional_policy_arns
 
       labels = {
         role                      = "managed-nodegroup"
@@ -204,6 +171,7 @@ resource "time_sleep" "cluster_admin_access_ready" {
     cluster_name             = module.cluster.cluster_name
     cluster_endpoint         = module.cluster.cluster_endpoint
     cluster_admin_principals = jsonencode(var.cluster_admin_principal_arns)
+    allowed_security_groups  = jsonencode(var.eks_api_allowed_security_group_ids)
   }
 
   depends_on = [aws_eks_access_policy_association.cluster_admin]
@@ -227,10 +195,7 @@ module "karpenter" {
   queue_name       = local.names.karpenter_queue
   rule_name_prefix = local.names.karpenter_rule_prefix
 
-  node_iam_role_additional_policies = {
-    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    AmazonEBSCSIDriverPolicy     = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-  }
+  node_iam_role_additional_policies = local.managed_node_additional_policy_arns
 
   tags = var.tags
 
