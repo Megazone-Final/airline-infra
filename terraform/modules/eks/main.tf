@@ -188,6 +188,7 @@ module "karpenter" {
 
   iam_role_name            = local.names.karpenter_controller
   iam_role_use_name_prefix = false
+  enable_inline_policy     = true
 
   node_iam_role_name            = local.names.karpenter_node
   node_iam_role_use_name_prefix = false
