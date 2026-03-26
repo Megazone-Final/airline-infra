@@ -31,7 +31,6 @@ module "eks" {
   eks_karpenter_namespace               = var.eks_karpenter_namespace
   eks_karpenter_service_account_name    = var.eks_karpenter_service_account_name
   eks_karpenter_ami_family              = var.eks_karpenter_ami_family
-  eks_karpenter_ami_alias               = var.eks_karpenter_ami_alias
   eks_karpenter_ami_id                  = var.eks_karpenter_ami_id
   eks_karpenter_instance_categories     = var.eks_karpenter_instance_categories
   eks_karpenter_architectures           = var.eks_karpenter_architectures

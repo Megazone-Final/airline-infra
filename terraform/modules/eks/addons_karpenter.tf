@@ -1,13 +1,13 @@
 locals {
-  karpenter_ami_selector_terms = var.eks_karpenter_ami_id != null ? [
+  karpenter_ami_selector_terms = [
     {
-      id = var.eks_karpenter_ami_id
-    }
-    ] : [
-    {
-      alias = var.eks_karpenter_ami_alias
+      id = var.eks_karpenter_ami_id != null ? var.eks_karpenter_ami_id : data.aws_ssm_parameter.karpenter_managed_node_group_ami_id.value
     }
   ]
+}
+
+data "aws_ssm_parameter" "karpenter_managed_node_group_ami_id" {
+  name = local.karpenter_managed_node_group_ami_ssm_parameter_name
 }
 
 resource "kubernetes_namespace" "karpenter" {

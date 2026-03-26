@@ -13,6 +13,16 @@ output "cluster_endpoint" {
   value       = module.cluster.cluster_endpoint
 }
 
+output "cluster_admin_principal_arns" {
+  description = "IAM principal ARNs granted cluster-admin access before in-cluster resources are applied."
+  value       = var.cluster_admin_principal_arns
+}
+
+output "eks_api_allowed_security_group_ids" {
+  description = "Security group IDs allowed to reach the private EKS API endpoint on port 443."
+  value       = var.eks_api_allowed_security_group_ids
+}
+
 output "cluster_certificate_authority_data" {
   description = "Base64-encoded certificate authority data for the shared EKS cluster."
   value       = module.cluster.cluster_certificate_authority_data
