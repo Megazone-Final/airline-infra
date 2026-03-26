@@ -9,7 +9,7 @@ module "eks" {
   node_private_subnet_ids = data.terraform_remote_state.network.outputs.node_private_subnet_ids
   pod_private_subnet_ids  = data.terraform_remote_state.network.outputs.pod_private_subnet_ids
   cluster_admin_principal_arns = {
-    workstation = aws_iam_role.workstation_eks_admin.arn
+    workstation = var.workstation_eks_admin_role_arn
   }
 
   eks_cluster_version                   = var.eks_cluster_version

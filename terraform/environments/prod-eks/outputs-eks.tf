@@ -84,11 +84,6 @@ output "eks_configure_kubectl" {
 }
 
 output "workstation_eks_admin_role_arn" {
-  description = "IAM role ARN to attach to the private workstation EC2 for EKS administration."
-  value       = aws_iam_role.workstation_eks_admin.arn
-}
-
-output "workstation_eks_admin_instance_profile_name" {
-  description = "Instance profile name to attach to the private workstation EC2."
-  value       = aws_iam_instance_profile.workstation_eks_admin.name
+  description = "Existing IAM role ARN used by workstation EC2 instances for EKS administration."
+  value       = var.workstation_eks_admin_role_arn
 }

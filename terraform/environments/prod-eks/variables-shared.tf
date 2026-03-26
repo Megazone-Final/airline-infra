@@ -22,6 +22,12 @@ variable "environment" {
   default     = "prod"
 }
 
+variable "workstation_eks_admin_role_arn" {
+  description = "Existing IAM role ARN used by workstation EC2 instances for EKS administration."
+  type        = string
+  default     = "arn:aws:iam::036333380579:role/iam-global-airline-ssm"
+}
+
 variable "tags" {
   description = "Additional tags applied to supported resources."
   type        = map(string)
