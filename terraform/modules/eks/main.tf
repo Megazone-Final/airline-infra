@@ -195,6 +195,35 @@ module "karpenter" {
   queue_name       = local.names.karpenter_queue
   rule_name_prefix = local.names.karpenter_rule_prefix
 
+  iam_policy_statements = [
+    # Karpenter's CreateFleet auth check can submit an empty karpenter.sh/nodepool tag
+    # before a real NodeClaim exists. Allow that validation call while still scoping it
+    # to this cluster and EC2NodeClass.
+    {
+      sid       = "AllowCreateFleetValidation"
+      effect    = "Allow"
+      actions   = ["ec2:CreateFleet"]
+      resources = ["arn:aws:ec2:${data.aws_region.current.region}:*:fleet/*"]
+      condition = [
+        {
+          test     = "StringEquals"
+          variable = "aws:RequestTag/kubernetes.io/cluster/${module.cluster.cluster_name}"
+          values   = ["owned"]
+        },
+        {
+          test     = "StringEquals"
+          variable = "aws:RequestTag/eks:eks-cluster-name"
+          values   = [module.cluster.cluster_name]
+        },
+        {
+          test     = "StringLike"
+          variable = "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass"
+          values   = ["*"]
+        },
+      ]
+    }
+  ]
+
   node_iam_role_additional_policies = local.managed_node_additional_policy_arns
 
   tags = var.tags
