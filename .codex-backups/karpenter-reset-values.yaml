@@ -1,0 +1,15 @@
+dnsPolicy: Default
+replicas: 2
+nodeSelector:
+  karpenter.sh/controller: "true"
+serviceAccount:
+  create: true
+  name: karpenter
+  annotations: {}
+settings:
+  clusterName: eks-an2-airline-main
+  clusterEndpoint: https://D5079BC0EFD6CF7D8EC0B21631272011.gr7.ap-northeast-2.eks.amazonaws.com
+  interruptionQueue: sqs-an2-airline-karpenter-events
+  reservedENIs: "1"
+webhook:
+  enabled: false
