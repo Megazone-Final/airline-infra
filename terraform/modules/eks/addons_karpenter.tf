@@ -65,6 +65,11 @@ resource "kubectl_manifest" "karpenter_ec2_node_class" {
     spec = {
       amiFamily = var.eks_karpenter_ami_family
       role      = module.karpenter.node_iam_role_name
+
+      kubelet = {
+        maxPods = 110
+      }
+
       tags = merge(var.tags, {
         Name      = local.names.karpenter_node_name
         ManagedBy = "karpenter"
