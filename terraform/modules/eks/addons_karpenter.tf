@@ -66,10 +66,6 @@ resource "kubectl_manifest" "karpenter_ec2_node_class" {
       amiFamily = var.eks_karpenter_ami_family
       role      = module.karpenter.node_iam_role_name
 
-      kubelet = {
-        maxPods = 110
-      }
-
       tags = merge(var.tags, {
         Name      = local.names.karpenter_node_name
         ManagedBy = "karpenter"
@@ -121,9 +117,9 @@ resource "kubectl_manifest" "karpenter_node_pool" {
               values   = var.eks_karpenter_architectures
             },
             {
-              key      = "karpenter.k8s.aws/instance-category"
+              key      = "node.kubernetes.io/instance-type"
               operator = "In"
-              values   = var.eks_karpenter_instance_categories
+              values   = var.eks_karpenter_instance_types
             }
           ]
         }
