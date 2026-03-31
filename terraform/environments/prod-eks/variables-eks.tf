@@ -113,10 +113,10 @@ variable "eks_karpenter_ami_id" {
   nullable    = true
 }
 
-variable "eks_karpenter_instance_categories" {
-  description = "Instance categories allowed by the default Karpenter NodePool."
+variable "eks_karpenter_instance_types" {
+  description = "Instance types allowed by the default Karpenter NodePool."
   type        = list(string)
-  default     = ["t", "m"]
+  default     = ["c7i.large", "c7i.xlarge", "c7i.2xlarge"]
 }
 
 variable "eks_karpenter_architectures" {
