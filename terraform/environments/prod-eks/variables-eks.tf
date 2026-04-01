@@ -82,6 +82,15 @@ variable "eks_managed_node_group_max_size" {
   default     = 1
 }
 
+variable "eks_pod_private_subnet_ids" {
+  description = "Pod subnet IDs used by EKS custom networking ENIConfig."
+  type        = map(string)
+  default = {
+    pod_private_2a = "subnet-072160d5a1806dcfb"
+    pod_private_2c = "subnet-00955cad282a63da1"
+  }
+}
+
 variable "eks_karpenter_chart_version" {
   description = "Pinned Karpenter Helm chart version."
   type        = string
