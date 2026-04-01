@@ -7,7 +7,7 @@ module "eks" {
   azs                     = var.azs
   vpc_id                  = data.terraform_remote_state.network.outputs.vpc_id
   node_private_subnet_ids = data.terraform_remote_state.network.outputs.node_private_subnet_ids
-  pod_private_subnet_ids  = data.terraform_remote_state.network.outputs.pod_private_subnet_ids
+  pod_private_subnet_ids  = var.eks_pod_private_subnet_ids
   cluster_admin_principal_arns = {
     workstation = var.workstation_eks_admin_role_arn
   }
