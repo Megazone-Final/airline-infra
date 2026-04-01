@@ -40,7 +40,7 @@ variable "azs" {
 variable "pod_secondary_cidr" {
   description = "Secondary CIDR block associated with the VPC for pod networking."
   type        = string
-  default     = "100.64.0.0/23"
+  default     = "100.64.0.0/20"
 }
 
 variable "subnets" {
@@ -118,7 +118,7 @@ variable "subnets" {
     }
     pod_private_2a = {
       name                    = "subnet-an2-airline-pod-pri-2a"
-      cidr_block              = "100.64.0.0/24"
+      cidr_block              = "100.64.0.0/21"
       availability_zone       = "ap-northeast-2a"
       tier                    = "private"
       role                    = "pod"
@@ -128,7 +128,7 @@ variable "subnets" {
     }
     pod_private_2c = {
       name                    = "subnet-an2-airline-pod-pri-2c"
-      cidr_block              = "100.64.1.0/24"
+      cidr_block              = "100.64.8.0/21"
       availability_zone       = "ap-northeast-2c"
       tier                    = "private"
       role                    = "pod"
