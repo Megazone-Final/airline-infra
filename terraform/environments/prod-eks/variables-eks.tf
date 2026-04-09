@@ -57,11 +57,11 @@ variable "eks_managed_node_groups" {
     min_size       = number
     max_size       = number
     labels         = optional(map(string), {})
-    taints = optional(list(object({
+    taints = optional(map(object({
       key    = string
       value  = string
       effect = string
-    })), [])
+    })), {})
   }))
   default = {
     system = {
@@ -76,7 +76,7 @@ variable "eks_managed_node_groups" {
         role                      = "system"
         "karpenter.sh/controller" = "true"
       }
-      taints = []
+      taints = {}
     }
     platform = {
       subnet_ids     = ["subnet-0a9c6410e9a9cba94", "subnet-0b2a66b3bb0697783"]
@@ -89,13 +89,13 @@ variable "eks_managed_node_groups" {
       labels = {
         role = "platform"
       }
-      taints = [
-        {
+      taints = {
+        dedicated = {
           key    = "dedicated"
           value  = "platform"
           effect = "NO_SCHEDULE"
         }
-      ]
+      }
     }
   }
 }
