@@ -49,12 +49,12 @@ output "node_security_group_id" {
 }
 
 output "managed_node_group_names" {
-  description = "Names of the baseline EKS managed node groups."
-  value       = [for config in values(local.baseline_managed_node_groups) : config.name]
+  description = "Names of the EKS managed node groups."
+  value       = [for config in values(local.managed_node_groups) : config.name]
 }
 
 output "managed_node_role_arns" {
-  description = "IAM role ARNs used by the baseline EKS managed node groups."
+  description = "IAM role ARNs used by the EKS managed node groups."
   value = {
     for group_name, group in module.cluster.eks_managed_node_groups :
     group_name => group.iam_role_arn
