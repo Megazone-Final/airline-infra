@@ -1,5 +1,9 @@
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
+data "aws_partition" "current" {}
+
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "~> 6.4"
@@ -112,11 +116,8 @@ module "cluster" {
       min_size     = config.min_size
       max_size     = config.max_size
 
-      iam_role_name            = config.iam_role_name
-      iam_role_use_name_prefix = false
-      iam_role_description     = "IAM role for the ${config.name} EKS managed node group"
-
-      iam_role_additional_policies = local.managed_node_additional_policy_arns
+      create_iam_role = false
+      iam_role_arn    = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/${config.iam_role_name}"
 
       labels = config.labels
       taints = config.taints
