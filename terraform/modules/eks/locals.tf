@@ -21,6 +21,14 @@ locals {
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
     AmazonEBSCSIDriverPolicy     = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   }
+  managed_node_base_policy_arns = {
+    AmazonEKSWorkerNodePolicy          = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+    AmazonEC2ContainerRegistryPullOnly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly"
+  }
+  managed_node_policy_arns = merge(
+    local.managed_node_base_policy_arns,
+    local.managed_node_additional_policy_arns,
+  )
 
   cluster_security_group_base_rules = {
     ingress_nodes_443 = {
