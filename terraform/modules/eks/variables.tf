@@ -103,11 +103,11 @@ variable "eks_managed_node_groups" {
     min_size       = number
     max_size       = number
     labels         = optional(map(string), {})
-    taints = optional(list(object({
+    taints = optional(map(object({
       key    = string
       value  = string
       effect = string
-    })), [])
+    })), {})
   }))
 }
 
