@@ -100,17 +100,17 @@ module "cluster" {
   }
 
   eks_managed_node_groups = {
-    for az_suffix, config in local.baseline_managed_node_groups :
+    for group_name, config in local.managed_node_groups :
     config.name => {
       ami_type       = var.eks_managed_node_group_ami_type
-      instance_types = var.eks_managed_node_group_instance_types
-      capacity_type  = var.eks_managed_node_group_capacity_type
-      disk_size      = var.eks_managed_node_group_disk_size
-      subnet_ids     = [config.subnet_id]
+      instance_types = config.instance_types
+      capacity_type  = config.capacity_type
+      disk_size      = config.disk_size
+      subnet_ids     = config.subnet_ids
 
-      desired_size = var.eks_managed_node_group_desired_size
-      min_size     = var.eks_managed_node_group_min_size
-      max_size     = var.eks_managed_node_group_max_size
+      desired_size = config.desired_size
+      min_size     = config.min_size
+      max_size     = config.max_size
 
       iam_role_name            = config.iam_role_name
       iam_role_use_name_prefix = false
@@ -118,10 +118,8 @@ module "cluster" {
 
       iam_role_additional_policies = local.managed_node_additional_policy_arns
 
-      labels = {
-        role                      = "managed-nodegroup"
-        "karpenter.sh/controller" = "true"
-      }
+      labels = config.labels
+      taints = config.taints
 
       tags = merge(var.tags, {
         Name = config.name

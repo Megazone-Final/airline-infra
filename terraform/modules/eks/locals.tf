@@ -4,8 +4,6 @@ locals {
   names = {
     cluster_role           = join("-", ["iam", var.region_code, var.project_name, "eks", "cluster"])
     cluster_security_group = join("-", ["secgrp", var.region_code, var.project_name, "eks", "cluster"])
-    managed_node_group     = join("-", ["mng", var.region_code, var.project_name, "eks", "system"])
-    managed_node_role      = join("-", ["iam", var.region_code, var.project_name, "eks", "node"])
     node_security_group    = join("-", ["secgrp", var.region_code, var.project_name, "eks", "node"])
     karpenter_controller   = join("-", ["iam", var.region_code, var.project_name, "karpenter", "controller"])
     karpenter_node         = join("-", ["iam", var.region_code, var.project_name, "karpenter", "node"])
@@ -63,13 +61,12 @@ locals {
   node_subnet_ids = [
     for key in local.node_subnet_keys : var.node_private_subnet_ids[key]
   ]
-  baseline_managed_node_groups = {
-    for subnet_key in local.node_subnet_keys :
-    replace(subnet_key, "node_private_", "") => {
-      name          = "${local.names.managed_node_group}-${replace(subnet_key, "node_private_", "")}"
-      subnet_id     = var.node_private_subnet_ids[subnet_key]
-      iam_role_name = "${local.names.managed_node_role}-${replace(subnet_key, "node_private_", "")}"
-    }
+  managed_node_groups = {
+    for group_name, config in var.eks_managed_node_groups :
+    group_name => merge(config, {
+      name          = join("-", ["mng", var.region_code, var.project_name, "eks", group_name])
+      iam_role_name = join("-", ["iam", var.region_code, var.project_name, "eks", "node", group_name])
+    })
   }
 
   pod_subnet_keys = sort(keys(var.pod_private_subnet_ids))

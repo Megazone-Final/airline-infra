@@ -88,38 +88,27 @@ variable "eks_cloudwatch_log_retention_in_days" {
 }
 
 variable "eks_managed_node_group_ami_type" {
-  description = "AMI type used by the baseline EKS managed node group."
+  description = "AMI type used by the EKS managed node groups."
   type        = string
 }
 
-variable "eks_managed_node_group_instance_types" {
-  description = "Instance types used by the baseline EKS managed node group."
-  type        = list(string)
-}
-
-variable "eks_managed_node_group_capacity_type" {
-  description = "Capacity type used by the baseline EKS managed node group."
-  type        = string
-}
-
-variable "eks_managed_node_group_disk_size" {
-  description = "Root volume size in GiB for the baseline EKS managed node group."
-  type        = number
-}
-
-variable "eks_managed_node_group_desired_size" {
-  description = "Desired node count for the baseline EKS managed node group."
-  type        = number
-}
-
-variable "eks_managed_node_group_min_size" {
-  description = "Minimum node count for the baseline EKS managed node group."
-  type        = number
-}
-
-variable "eks_managed_node_group_max_size" {
-  description = "Maximum node count for the baseline EKS managed node group."
-  type        = number
+variable "eks_managed_node_groups" {
+  description = "Managed node groups keyed by logical role such as system or platform."
+  type = map(object({
+    subnet_ids     = list(string)
+    instance_types = list(string)
+    capacity_type  = string
+    disk_size      = number
+    desired_size   = number
+    min_size       = number
+    max_size       = number
+    labels         = optional(map(string), {})
+    taints = optional(list(object({
+      key    = string
+      value  = string
+      effect = string
+    })), [])
+  }))
 }
 
 variable "eks_karpenter_namespace" {
