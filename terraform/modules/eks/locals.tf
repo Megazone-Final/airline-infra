@@ -4,6 +4,7 @@ locals {
   names = {
     cluster_role           = join("-", ["iam", var.region_code, var.project_name, "eks", "cluster"])
     cluster_security_group = join("-", ["secgrp", var.region_code, var.project_name, "eks", "cluster"])
+    managed_node_role      = join("-", ["iam", var.region_code, var.project_name, "eks", "node"])
     node_security_group    = join("-", ["secgrp", var.region_code, var.project_name, "eks", "node"])
     karpenter_controller   = join("-", ["iam", var.region_code, var.project_name, "karpenter", "controller"])
     karpenter_node         = join("-", ["iam", var.region_code, var.project_name, "karpenter", "node"])
@@ -65,7 +66,7 @@ locals {
     for group_name, config in var.eks_managed_node_groups :
     group_name => merge(config, {
       name          = join("-", ["mng", var.region_code, var.project_name, "eks", group_name])
-      iam_role_name = join("-", ["iam", var.region_code, var.project_name, "eks", "node", group_name])
+      iam_role_name = local.names.managed_node_role
     })
   }
 
