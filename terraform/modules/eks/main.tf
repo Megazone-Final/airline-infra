@@ -1,9 +1,5 @@
 data "aws_region" "current" {}
 
-data "aws_caller_identity" "current" {}
-
-data "aws_partition" "current" {}
-
 module "vpc_cni_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts"
   version = "~> 6.4"
@@ -117,7 +113,7 @@ module "cluster" {
       max_size     = config.max_size
 
       create_iam_role = false
-      iam_role_arn    = "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/${config.iam_role_name}"
+      iam_role_arn    = aws_iam_role.managed_node.arn
 
       labels = config.labels
       taints = config.taints
@@ -147,6 +143,36 @@ resource "aws_eks_access_entry" "cluster_admin" {
   cluster_name  = module.cluster.cluster_name
   principal_arn = each.value
   type          = "STANDARD"
+}
+
+data "aws_iam_policy_document" "managed_node_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "managed_node" {
+  name               = local.names.managed_node_role
+  assume_role_policy = data.aws_iam_policy_document.managed_node_assume_role.json
+  description        = "IAM role for the shared EKS managed node groups"
+
+  tags = merge(var.tags, {
+    Name = local.names.managed_node_role
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "managed_node" {
+  for_each = local.managed_node_policy_arns
+
+  role       = aws_iam_role.managed_node.name
+  policy_arn = each.value
 }
 
 resource "aws_eks_access_policy_association" "cluster_admin" {
