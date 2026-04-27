@@ -143,7 +143,7 @@ variable "eks_karpenter_ami_id" {
 variable "eks_karpenter_instance_types" {
   description = "Instance types allowed by the default Karpenter NodePool."
   type        = list(string)
-  default     = ["c7i.large", "c7i.xlarge", "c7i.2xlarge"]
+  default     = ["c7i.large", "c7i.xlarge", "c7i.2xlarge", "c7i.4xlarge"]
 }
 
 variable "eks_karpenter_architectures" {
